@@ -139,8 +139,9 @@ services:
   race-command-center-dashboard:
     image: nginx:1.27-alpine
     ports:
-      - "${RACE_DASHBOARD_PORT:-8080}:80"
+      - "${RACE_DASHBOARD_PORT:-8090}:80"
     volumes:
+      - ./apps/web-dashboard:/usr/share/nginx/html:ro
       - ./README.md:/usr/share/nginx/html/README.md:ro
       - ./docs:/usr/share/nginx/html/docs:ro
     depends_on:
@@ -155,4 +156,3 @@ volumes:
   postgres-data:
   minio-data:
   grafana-data:
-

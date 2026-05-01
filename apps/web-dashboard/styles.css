@@ -1,0 +1,427 @@
+:root {
+  --bg: #090d12;
+  --surface: #111820;
+  --surface-2: #17212b;
+  --line: #263443;
+  --text: #e7edf2;
+  --muted: #95a6b5;
+  --cyan: #42d3e8;
+  --green: #49d17c;
+  --amber: #e8b64a;
+  --red: #f05d5e;
+  --violet: #a88cff;
+  --radius: 8px;
+  --mono: "Consolas", "JetBrains Mono", "SFMono-Regular", monospace;
+  --sans: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+button {
+  font: inherit;
+}
+
+.shell {
+  width: min(1720px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 18px 0 28px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.session-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.status-dot.live {
+  background: var(--green);
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 14px 0;
+}
+
+.tab {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.tab.active,
+.tab:hover {
+  border-color: var(--cyan);
+  color: var(--text);
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.metric,
+.panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.metric {
+  min-height: 104px;
+  padding: 14px;
+}
+
+.metric span,
+.metric small {
+  display: block;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.metric strong {
+  display: block;
+  margin: 8px 0 2px;
+  font-family: var(--mono);
+  font-size: 31px;
+  line-height: 1;
+}
+
+.metric.warning strong {
+  color: var(--amber);
+}
+
+.metric.danger strong {
+  color: var(--red);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.panel {
+  min-height: 180px;
+  padding: 14px;
+}
+
+.panel.wide {
+  grid-column: span 2;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.panel-head span {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+canvas {
+  width: 100%;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #0b1117;
+}
+
+.phase-track,
+.pipeline,
+.edge-grid,
+.checklist,
+.repo-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.phase-track {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.phase,
+.pipeline span,
+.checklist span,
+.repo-stack span,
+.edge-point {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: 10px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.phase.active {
+  border-color: var(--cyan);
+  color: var(--text);
+}
+
+.kv {
+  display: grid;
+  gap: 9px;
+  margin: 14px 0 0;
+}
+
+.kv div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+
+.kv dt,
+.kv dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.kv dt {
+  color: var(--muted);
+}
+
+.kv dd {
+  color: var(--text);
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--bg) !important;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.badge.ok {
+  background: var(--green);
+}
+
+.badge.warning {
+  background: var(--amber);
+}
+
+.badge.danger {
+  background: var(--red);
+}
+
+.gauge {
+  position: relative;
+  height: 18px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #0b1117;
+}
+
+.gauge-fill {
+  width: 82%;
+  height: 100%;
+  background: var(--red);
+}
+
+.gauge span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.callout {
+  margin-top: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.edge-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.edge-point strong,
+.big-number {
+  display: block;
+  margin: 8px 0;
+  font-family: var(--mono);
+  font-size: 36px;
+  line-height: 1;
+}
+
+.edge-point.accepted {
+  border-color: var(--green);
+}
+
+.edge-point.rejected {
+  border-color: #414e5c;
+}
+
+.pipeline {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.pipeline span {
+  text-align: center;
+}
+
+.event-log {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.checklist span.done {
+  border-color: var(--green);
+  color: var(--text);
+}
+
+.checklist span.active {
+  border-color: var(--cyan);
+  color: var(--text);
+}
+
+.evidence-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.evidence-table th,
+.evidence-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 8px;
+  text-align: left;
+}
+
+.evidence-table th {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.repo-stack {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 1100px) {
+  .metric-grid,
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .panel.wide {
+    grid-column: span 2;
+  }
+
+  .pipeline,
+  .edge-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    width: min(100vw - 20px, 720px);
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .metric-grid,
+  .dashboard-grid,
+  .edge-grid,
+  .pipeline,
+  .repo-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .panel.wide {
+    grid-column: span 1;
+  }
+}
+

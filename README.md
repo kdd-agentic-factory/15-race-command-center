@@ -57,6 +57,7 @@ make ps
 make logs
 make validate-global
 make paper-poc
+make start-web
 ```
 
 On Windows, the same launch path is available with:
@@ -91,6 +92,22 @@ The PoC maps the paper's edge-AI claims to MotoGP engineering scenarios:
 operating-point selection, Digital Factor of Safety, Intelligence-per-Watt,
 high-frequency telemetry, tire degradation, crew-chief approval and
 circuit-specific part design.
+
+## Real-Time Web Dashboard
+
+The live web dashboard is in `apps/web-dashboard` and can run without external
+frontend dependencies:
+
+```bash
+make start-web
+```
+
+Open `http://localhost:8090`.
+
+It visualizes synthetic high-frequency telemetry in real time and connects the
+paper plus the linked advanced command-center study to operational modules:
+Edge AI, Edge-to-Lakehouse streaming, multi-agent orchestration, SDD governance,
+RNN-PINN/UKF-M prediction, crew-chief decisions and circuit-specific parts.
 
 ## Core Modules
 

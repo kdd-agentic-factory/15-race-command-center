@@ -3,9 +3,11 @@ services:
     image: nginx:1.27-alpine
     container_name: race-command-center-dashboard
     ports:
-      - "${RACE_DASHBOARD_PORT:-8080}:80"
+      - "${RACE_DASHBOARD_PORT:-8090}:80"
     volumes:
+      - ./apps/web-dashboard:/usr/share/nginx/html:ro
       - ./README.md:/usr/share/nginx/html/README.md:ro
+      - ./docs:/usr/share/nginx/html/docs:ro
     labels:
       app.kubernetes.io/name: race-command-center
 
@@ -36,4 +38,3 @@ services:
       - ./apps/crew-chief-console:/usr/share/nginx/html:ro
     ports:
       - "8103:80"
-

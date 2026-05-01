@@ -230,6 +230,7 @@ services:
     ports:
       - "${RACE_DASHBOARD_PORT:-8090}:80"
     volumes:
+      - ./apps/web-dashboard:/usr/share/nginx/html:ro
       - ./README.md:/usr/share/nginx/html/README.md:ro
       - ./docs:/usr/share/nginx/html/docs:ro
       - ./dashboards:/usr/share/nginx/html/dashboards:ro

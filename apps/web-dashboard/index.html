@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Race Command Center</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">15-race-command-center</p>
+          <h1>Race Engineering Operating System</h1>
+        </div>
+        <div class="session-strip" aria-label="session status">
+          <span class="status-dot live"></span>
+          <span id="clock">--:--:--</span>
+          <span>Jerez T05</span>
+          <span>FP2 Lap <strong id="lap">14</strong></span>
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="dashboard modules">
+        <button class="tab active" data-tab="live">Live Telemetry</button>
+        <button class="tab" data-tab="edge">Edge AI</button>
+        <button class="tab" data-tab="agents">Agents</button>
+        <button class="tab" data-tab="prediction">RNN-PINN</button>
+        <button class="tab" data-tab="parts">Parts</button>
+        <button class="tab" data-tab="evidence">Paper Evidence</button>
+      </nav>
+
+      <main>
+        <section class="view active" id="view-live">
+          <section class="metric-grid">
+            <article class="metric">
+              <span>Speed</span>
+              <strong id="speed">0</strong>
+              <small>km/h</small>
+            </article>
+            <article class="metric">
+              <span>TPS</span>
+              <strong id="tps">0</strong>
+              <small>%</small>
+            </article>
+            <article class="metric warning">
+              <span>Front Brake</span>
+              <strong id="brake">0.0</strong>
+              <small>bar</small>
+            </article>
+            <article class="metric">
+              <span>Lean</span>
+              <strong id="lean">0</strong>
+              <small>deg</small>
+            </article>
+            <article class="metric danger">
+              <span>Rear Tire</span>
+              <strong id="tire">0</strong>
+              <small>C carcass</small>
+            </article>
+            <article class="metric">
+              <span>Spin Ratio</span>
+              <strong id="spin">0.000</strong>
+              <small>rear/gps</small>
+            </article>
+          </section>
+
+          <section class="dashboard-grid">
+            <article class="panel wide">
+              <div class="panel-head">
+                <h2>High-Frequency Telemetry Stream</h2>
+                <span id="sample-rate">100 Hz synthetic</span>
+              </div>
+              <canvas id="telemetry-chart" height="220"></canvas>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Corner Micro-Segmentation</h2>
+                <span id="phase">braking</span>
+              </div>
+              <div class="phase-track">
+                <div class="phase active" id="phase-braking">Braking</div>
+                <div class="phase" id="phase-apex">Apex</div>
+                <div class="phase" id="phase-drive">Drive</div>
+              </div>
+              <dl class="kv">
+                <div><dt>max brake</dt><dd id="max-brake">12.4 bar</dd></div>
+                <div><dt>min speed</dt><dd id="min-speed">91.2 km/h</dd></div>
+                <div><dt>max spin</dt><dd id="max-spin">0.083</dd></div>
+              </dl>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Tire Collapse Predictor</h2>
+                <span class="badge danger" id="tire-status">warning</span>
+              </div>
+              <div class="gauge">
+                <div class="gauge-fill" id="tire-gauge"></div>
+                <span id="tire-risk">82%</span>
+              </div>
+              <p class="callout" id="tire-action">Switch to engine map 2 and reduce torque delivery in T05/T08/T13.</p>
+            </article>
+          </section>
+        </section>
+
+        <section class="view" id="view-edge">
+          <section class="dashboard-grid">
+            <article class="panel wide">
+              <div class="panel-head">
+                <h2>Paper Operating Point</h2>
+                <span>PTQ + edge feasibility</span>
+              </div>
+              <div class="edge-grid">
+                <div class="edge-point rejected">
+                  <span>FP16 32B</span>
+                  <strong>61 GB</strong>
+                  <small>26.0 tok/s, 295 W</small>
+                </div>
+                <div class="edge-point rejected">
+                  <span>INT8 32B</span>
+                  <strong>34 GB</strong>
+                  <small>44.2 tok/s, 218 W</small>
+                </div>
+                <div class="edge-point accepted">
+                  <span>INT4 32B</span>
+                  <strong>18 GB</strong>
+                  <small>69.9 tok/s, 165 W</small>
+                </div>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Digital FoS</h2>
+                <span class="badge ok">inside envelope</span>
+              </div>
+              <strong class="big-number" id="fos">1.026</strong>
+              <p class="callout">Guardrail for semantic integrity after Hessian-aware quantization.</p>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h2>IPW</h2>
+                <span class="badge ok">best profile</span>
+              </div>
+              <strong class="big-number" id="ipw">0.4236</strong>
+              <p class="callout">Useful inference per watt for trackside edge deployment.</p>
+            </article>
+            <article class="panel wide">
+              <div class="panel-head">
+                <h2>Edge-to-Lakehouse Flow</h2>
+                <span id="pipeline-latency">42 ms p95</span>
+              </div>
+              <div class="pipeline">
+                <span>ECU/IMU</span>
+                <span>Edge Filter</span>
+                <span>Redpanda</span>
+                <span>Flink</span>
+                <span>KDD</span>
+                <span>Lakehouse</span>
+                <span>Dashboard</span>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="view" id="view-agents">
+          <section class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Supervisor Agent</h2>
+                <span class="badge ok">routing</span>
+              </div>
+              <dl class="kv">
+                <div><dt>intent</dt><dd>tire risk</dd></div>
+                <div><dt>policy</dt><dd>approval required</dd></div>
+                <div><dt>MCP tools</dt><dd>5 online</dd></div>
+              </dl>
+            </article>
+            <article class="panel wide">
+              <div class="panel-head">
+                <h2>Subagent Activity</h2>
+                <span>isolated contracts</span>
+              </div>
+              <ol class="event-log" id="agent-log"></ol>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h2>SDD Gate</h2>
+                <span class="badge ok">as-built trace</span>
+              </div>
+              <div class="checklist">
+                <span class="done">requirements.md</span>
+                <span class="done">feasibility.md</span>
+                <span class="done">design.md</span>
+                <span class="done">tasks.md</span>
+                <span class="active">as-built.md</span>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="view" id="view-prediction">
+          <section class="dashboard-grid">
+            <article class="panel wide">
+              <div class="panel-head">
+                <h2>RNN-PINN Hybrid Dynamics</h2>
+                <span>physics guard active</span>
+              </div>
+              <canvas id="prediction-chart" height="220"></canvas>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Physics Loss</h2>
+                <span class="badge ok">bounded</span>
+              </div>
+              <strong class="big-number" id="physics-loss">0.018</strong>
+              <p class="callout">Data loss + physics residual + boundary loss.</p>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h2>UKF-M Drift</h2>
+                <span id="drift-status" class="badge ok">corrected</span>
+              </div>
+              <strong class="big-number" id="imu-drift">0.42</strong>
+              <p class="callout">IMU bias correction before MPC analysis.</p>
+            </article>
+          </section>
+        </section>
+
+        <section class="view" id="view-parts">
+          <section class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Brake Duct Jerez V1</h2>
+                <span class="badge warning">approval</span>
+              </div>
+              <dl class="kv">
+                <div><dt>target</dt><dd>-15 C brake temp</dd></div>
+                <div><dt>drag max</dt><dd>1.5%</dd></div>
+                <div><dt>material</dt><dd>PA12_CF</dd></div>
+              </dl>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Gyroid Support</h2>
+                <span class="badge ok">lightweight</span>
+              </div>
+              <dl class="kv">
+                <div><dt>mass</dt><dd>142 g</dd></div>
+                <div><dt>wall</dt><dd>1.2 mm</dd></div>
+                <div><dt>factor</dt><dd>1.8</dd></div>
+              </dl>
+            </article>
+            <article class="panel wide">
+              <div class="panel-head">
+                <h2>Crew Chief Recommendation</h2>
+                <span class="badge danger">human gate</span>
+              </div>
+              <p class="callout">Rear spin is rising after apex under high carcass temperature. Approve engine map 2 after lap 14, add two clicks rear rebound, and evaluate brake duct V1 before FP3.</p>
+            </article>
+          </section>
+        </section>
+
+        <section class="view" id="view-evidence">
+          <section class="dashboard-grid">
+            <article class="panel wide">
+              <div class="panel-head">
+                <h2>Paper + Linked Study Coverage</h2>
+                <span class="badge ok">demonstrable PoC</span>
+              </div>
+              <table class="evidence-table">
+                <thead>
+                  <tr><th>Claim</th><th>Live module</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Hessian-aware PTQ enables edge LLM deployment</td><td>Edge AI</td><td>ready</td></tr>
+                  <tr><td>FoSdig and IPW certify operating point</td><td>Edge AI</td><td>ready</td></tr>
+                  <tr><td>1M+ telemetry points/s require streaming-native design</td><td>Live Telemetry</td><td>simulated</td></tr>
+                  <tr><td>MAS avoids context dilution</td><td>Agents</td><td>ready</td></tr>
+                  <tr><td>SDD governs autonomous code changes</td><td>Agents</td><td>ready</td></tr>
+                  <tr><td>RNN-PINN/UKF-M predicts constrained dynamics</td><td>RNN-PINN</td><td>prototype</td></tr>
+                  <tr><td>Telemetry closes loop into setup and parts</td><td>Parts</td><td>ready</td></tr>
+                </tbody>
+              </table>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Repository Stack</h2>
+                <span>00-15</span>
+              </div>
+              <div class="repo-stack" id="repo-stack"></div>
+            </article>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
