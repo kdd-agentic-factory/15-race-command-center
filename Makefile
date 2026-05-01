@@ -1,25 +1,35 @@
+COMPOSE_GLOBAL=docker compose -f ../10-infra-docker/docker-compose.yml -f ../10-infra-docker/docker-compose.observability.yml -f docker-compose.global.yml
 COMPOSE_FULL=docker compose -f docker-compose.full-stack.yml
 COMPOSE_RACE=docker compose -f docker-compose.race.yml
 
-.PHONY: start start-race stop reset logs deploy-k8s export-paper-evidence validate
+.PHONY: start start-race start-local-stack stop stop-race reset logs ps deploy-k8s export-paper-evidence validate validate-global
 
 start:
+	$(COMPOSE_GLOBAL) up -d --build
+
+start-local-stack:
 	$(COMPOSE_FULL) up -d --build
 
 start-race:
 	$(COMPOSE_RACE) up -d --build
 
 stop:
+	$(COMPOSE_GLOBAL) down
+
+stop-race:
 	$(COMPOSE_FULL) down
 
 reset:
-	$(COMPOSE_FULL) down -v
+	$(COMPOSE_GLOBAL) down -v
 
 logs:
-	$(COMPOSE_FULL) logs -f --tail=200
+	$(COMPOSE_GLOBAL) logs -f --tail=200
+
+ps:
+	$(COMPOSE_GLOBAL) ps
 
 deploy-k8s:
-	kubectl apply -f k8s/
+	powershell -ExecutionPolicy Bypass -File scripts/deploy-k8s.ps1
 
 export-paper-evidence:
 	sh scripts/export-paper-evidence.sh
@@ -27,3 +37,5 @@ export-paper-evidence:
 validate:
 	python -c "import pathlib, yaml; [yaml.safe_load(open(p, encoding='utf-8')) for p in pathlib.Path('.').rglob('*.yml')]; [yaml.safe_load(open(p, encoding='utf-8')) for p in pathlib.Path('.').rglob('*.yaml')]; print('yaml ok')"
 
+validate-global:
+	$(COMPOSE_GLOBAL) config --quiet

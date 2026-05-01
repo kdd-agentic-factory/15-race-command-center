@@ -1,0 +1,259 @@
+services:
+  governance-repo:
+    image: nginx:1.27-alpine
+    ports:
+      - "${GOVERNANCE_PORT:-8200}:80"
+    volumes:
+      - ../00-kdd-governance:/usr/share/nginx/html/repository:ro
+    labels:
+      kdd.factory.repo: "00-kdd-governance"
+      kdd.factory.role: "governance-and-policies"
+    networks:
+      - agentic
+
+  agent-orchestrator-repo:
+    build:
+      context: ../01-agent-orchestrator
+    ports:
+      - "${AGENT_ORCHESTRATOR_REPO_PORT:-8210}:8000"
+    environment:
+      SERVICE_NAME: agent-orchestrator-repo
+      MCP_GATEWAY_URL: http://mcp-gateway:8080
+      KNOWLEDGE_LAYER_URL: http://knowledge-layer:8080
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      - mcp-gateway
+      - knowledge-layer
+      - postgres
+      - redpanda
+    labels:
+      kdd.factory.repo: "01-agent-orchestrator"
+      kdd.factory.role: "multi-agent-orchestration"
+    networks:
+      - agentic
+
+  mcp-gateway-repo:
+    build:
+      context: ../02-mcp-gateway
+    ports:
+      - "${MCP_GATEWAY_REPO_PORT:-8220}:8080"
+    environment:
+      SERVICE_NAME: mcp-gateway-repo
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    labels:
+      kdd.factory.repo: "02-mcp-gateway"
+      kdd.factory.role: "tool-connectivity"
+    networks:
+      - agentic
+
+  knowledge-layer-repo:
+    build:
+      context: ../03-rag-cag-knowledge-layer
+    ports:
+      - "${KNOWLEDGE_LAYER_REPO_PORT:-8230}:8000"
+    environment:
+      SERVICE_NAME: knowledge-layer-repo
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-agentic_factory}
+      POSTGRES_USER: ${POSTGRES_USER:-agentic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agentic}
+      QDRANT_URL: http://qdrant:6333
+      MINIO_ENDPOINT: http://minio:9000
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      - postgres
+      - qdrant
+      - minio
+    labels:
+      kdd.factory.repo: "03-rag-cag-knowledge-layer"
+      kdd.factory.role: "knowledge-and-context"
+    networks:
+      - agentic
+
+  skills-registry-repo:
+    build:
+      context: ../04-skills-autoskills-registry
+    command: ["python", "-m", "http.server", "8000"]
+    working_dir: /app
+    ports:
+      - "${SKILLS_REGISTRY_REPO_PORT:-8240}:8000"
+    environment:
+      SERVICE_NAME: skills-registry-repo
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    labels:
+      kdd.factory.repo: "04-skills-autoskills-registry"
+      kdd.factory.role: "reusable-capabilities"
+    networks:
+      - agentic
+
+  documentation-agent-repo:
+    build:
+      context: ../05-documentation-agent
+    ports:
+      - "${DOCUMENTATION_AGENT_REPO_PORT:-8250}:8000"
+    environment:
+      SERVICE_NAME: documentation-agent-repo
+      MINIO_ENDPOINT: http://minio:9000
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      - minio
+    labels:
+      kdd.factory.repo: "05-documentation-agent"
+      kdd.factory.role: "active-documentation"
+    networks:
+      - agentic
+
+  kdd-data-pipelines-repo:
+    build:
+      context: ../06-kdd-data-pipelines
+    command: ["python", "-m", "http.server", "8000"]
+    working_dir: /app
+    ports:
+      - "${KDD_PIPELINES_REPO_PORT:-8260}:8000"
+    environment:
+      SERVICE_NAME: kdd-data-pipelines-repo
+      REDPANDA_BROKERS: redpanda:29092
+      MINIO_ENDPOINT: http://minio:9000
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      - redpanda
+      - minio
+    labels:
+      kdd.factory.repo: "06-kdd-data-pipelines"
+      kdd.factory.role: "kdd-pipelines"
+    networks:
+      - agentic
+
+  agentic-workflows-repo:
+    image: nginx:1.27-alpine
+    ports:
+      - "${AGENTIC_WORKFLOWS_PORT:-8270}:80"
+    volumes:
+      - ../07-agentic-workflows:/usr/share/nginx/html/repository:ro
+    labels:
+      kdd.factory.repo: "07-agentic-workflows"
+      kdd.factory.role: "execution-workflows"
+    networks:
+      - agentic
+
+  experimentation-lab-repo:
+    image: nginx:1.27-alpine
+    ports:
+      - "${EXPERIMENTATION_LAB_PORT:-8280}:80"
+    volumes:
+      - ../08-experimentation-lab:/usr/share/nginx/html/repository:ro
+    labels:
+      kdd.factory.repo: "08-experimentation-lab"
+      kdd.factory.role: "scientific-validation"
+    networks:
+      - agentic
+
+  observability-platform-repo:
+    image: nginx:1.27-alpine
+    ports:
+      - "${OBSERVABILITY_REPO_PORT:-8290}:80"
+    volumes:
+      - ../09-observability-platform:/usr/share/nginx/html/repository:ro
+    labels:
+      kdd.factory.repo: "09-observability-platform"
+      kdd.factory.role: "metrics-logs-traces"
+    networks:
+      - agentic
+
+  infra-docker-repo:
+    image: nginx:1.27-alpine
+    ports:
+      - "${INFRA_DOCKER_REPO_PORT:-8300}:80"
+    volumes:
+      - ../10-infra-docker:/usr/share/nginx/html/repository:ro
+    labels:
+      kdd.factory.repo: "10-infra-docker"
+      kdd.factory.role: "local-development-infrastructure"
+    networks:
+      - agentic
+
+  infra-kubernetes-repo:
+    image: nginx:1.27-alpine
+    ports:
+      - "${INFRA_KUBERNETES_REPO_PORT:-8310}:80"
+    volumes:
+      - ../11-infra-kubernetes:/usr/share/nginx/html/repository:ro
+    labels:
+      kdd.factory.repo: "11-infra-kubernetes"
+      kdd.factory.role: "scalable-deployment"
+    networks:
+      - agentic
+
+  ci-cd-security-repo:
+    image: nginx:1.27-alpine
+    ports:
+      - "${CI_CD_SECURITY_REPO_PORT:-8320}:80"
+    volumes:
+      - ../12-ci-cd-security:/usr/share/nginx/html/repository:ro
+    labels:
+      kdd.factory.repo: "12-ci-cd-security"
+      kdd.factory.role: "ci-cd-and-security"
+    networks:
+      - agentic
+
+  ui-command-center-repo:
+    image: node:20-alpine
+    working_dir: /app
+    command: ["sh", "-c", "npm run dev -- --port 5173"]
+    ports:
+      - "${UI_COMMAND_CENTER_PORT:-8330}:5173"
+    volumes:
+      - ../13-ui-command-center:/app
+      - ui-command-center-node-modules:/app/node_modules
+    environment:
+      VITE_RACE_COMMAND_CENTER_URL: http://localhost:${RACE_DASHBOARD_PORT:-8090}
+    labels:
+      kdd.factory.repo: "13-ui-command-center"
+      kdd.factory.role: "ui-components-and-design-system"
+    networks:
+      - agentic
+
+  paper-reproducibility-kit-repo:
+    image: nginx:1.27-alpine
+    ports:
+      - "${PAPER_REPRODUCIBILITY_PORT:-8340}:80"
+    volumes:
+      - ../14-paper-reproducibility-kit:/usr/share/nginx/html/repository:ro
+    labels:
+      kdd.factory.repo: "14-paper-reproducibility-kit"
+      kdd.factory.role: "paper-and-reproducibility"
+    networks:
+      - agentic
+
+  race-command-center:
+    image: nginx:1.27-alpine
+    ports:
+      - "${RACE_DASHBOARD_PORT:-8090}:80"
+    volumes:
+      - ./README.md:/usr/share/nginx/html/README.md:ro
+      - ./docs:/usr/share/nginx/html/docs:ro
+      - ./dashboards:/usr/share/nginx/html/dashboards:ro
+      - ./data-contracts:/usr/share/nginx/html/data-contracts:ro
+      - ./workflows:/usr/share/nginx/html/workflows:ro
+    depends_on:
+      - orchestrator
+      - mcp-gateway
+      - knowledge-layer
+      - skills-registry
+      - documentation-agent
+      - redpanda
+      - qdrant
+      - minio
+      - grafana
+    labels:
+      kdd.factory.repo: "15-race-command-center"
+      kdd.factory.role: "final-operational-dashboard-and-global-launcher"
+    networks:
+      - agentic
+
+networks:
+  agentic:
+    name: ${COMPOSE_PROJECT_NAME:-kdd-agentic-factory}-network
+
+volumes:
+  ui-command-center-node-modules:
