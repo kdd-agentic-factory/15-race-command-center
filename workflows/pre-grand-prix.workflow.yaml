@@ -1,0 +1,59 @@
+id: pre-grand-prix-workflow
+name: Pre Grand Prix Preparation Workflow
+description: Turns circuit context, historical telemetry and constraints into an FP1 plan.
+steps:
+  - id: load_circuit_profile
+    agent: track_model_agent
+    inputs:
+      - circuit_id
+      - weather_forecast
+      - historical_sessions
+    outputs:
+      - circuit_profile.yaml
+
+  - id: retrieve_historical_patterns
+    agent: pattern_discovery_agent
+    tools:
+      - vector.search_context
+      - minio.load_session_data
+    outputs:
+      - historical_patterns.yaml
+
+  - id: generate_baseline_setup
+    agent: crew_chief_agent
+    inputs:
+      - circuit_profile.yaml
+      - historical_patterns.yaml
+    outputs:
+      - baseline_setup.yaml
+
+  - id: estimate_tire_risk
+    agent: tire_degradation_agent
+    inputs:
+      - baseline_setup.yaml
+      - weather_forecast
+      - historical_sessions
+    outputs:
+      - tire_risk_report.yaml
+
+  - id: recommend_circuit_parts
+    agent: parts_design_agent
+    inputs:
+      - circuit_profile.yaml
+      - tire_risk_report.yaml
+    outputs:
+      - parts_recommendation.md
+
+  - id: validate_with_crew_chief
+    agent: approval_agent
+    approval_required: true
+    inputs:
+      - baseline_setup.yaml
+      - tire_risk_report.yaml
+      - parts_recommendation.md
+
+  - id: generate_fp1_plan
+    agent: documentation_agent
+    outputs:
+      - fp1_run_plan.md
+

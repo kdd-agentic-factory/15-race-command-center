@@ -1,0 +1,44 @@
+id: part.schema
+version: 0.1.0
+type: object
+required: [part_id, circuit, objective, constraints, target_metrics, approval_required]
+properties:
+  part_id:
+    type: string
+  circuit:
+    type: string
+  objective:
+    type: array
+    items:
+      type: string
+  constraints:
+    type: object
+    properties:
+      max_weight_g:
+        type: number
+      manufacturing_method:
+        type: string
+      material:
+        type: string
+      min_wall_thickness_mm:
+        type: number
+  target_metrics:
+    type: object
+  approval_required:
+    type: boolean
+example:
+  part_id: brake_duct_jerez_v1
+  circuit: jerez
+  objective:
+    - improve_front_brake_cooling
+    - reduce_thermal_fade
+  constraints:
+    max_weight_g: 180
+    manufacturing_method: additive_manufacturing
+    material: PA12_CF
+    min_wall_thickness_mm: 1.2
+  target_metrics:
+    brake_temp_reduction_c: 15
+    drag_penalty_max_percent: 1.5
+  approval_required: true
+

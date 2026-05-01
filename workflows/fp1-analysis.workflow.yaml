@@ -1,0 +1,14 @@
+id: fp1-analysis-workflow
+name: FP1 Analysis Workflow
+steps:
+  - id: ingest_fp1_telemetry
+    agent: telemetry_session_agent
+  - id: run_ekf_state_estimation
+    agent: ekf_state_estimator_agent
+  - id: segment_corners
+    agent: curve_segmentation_agent
+  - id: identify_first_setup_issues
+    agent: crew_chief_agent
+  - id: generate_fp2_candidates
+    agent: documentation_agent
+

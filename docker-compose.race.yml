@@ -1,0 +1,39 @@
+services:
+  race-command-center-dashboard:
+    image: nginx:1.27-alpine
+    container_name: race-command-center-dashboard
+    ports:
+      - "${RACE_DASHBOARD_PORT:-8080}:80"
+    volumes:
+      - ./README.md:/usr/share/nginx/html/README.md:ro
+    labels:
+      app.kubernetes.io/name: race-command-center
+
+  race-session-api:
+    image: python:3.12-alpine
+    container_name: race-session-api
+    command: ["python", "-m", "http.server", "8000"]
+    working_dir: /app
+    volumes:
+      - ./services/race-session-api:/app:ro
+    ports:
+      - "8101:8000"
+
+  telemetry-session-api:
+    image: python:3.12-alpine
+    container_name: telemetry-session-api
+    command: ["python", "-m", "http.server", "8000"]
+    working_dir: /app
+    volumes:
+      - ./services/telemetry-session-api:/app:ro
+    ports:
+      - "8102:8000"
+
+  crew-chief-console:
+    image: nginx:1.27-alpine
+    container_name: crew-chief-console
+    volumes:
+      - ./apps/crew-chief-console:/usr/share/nginx/html:ro
+    ports:
+      - "8103:80"
+

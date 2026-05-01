@@ -1,0 +1,21 @@
+id: crew-chief-decision.schema
+version: 0.1.0
+type: object
+required: [decision_id, recommendation_id, status, approver]
+properties:
+  decision_id:
+    type: string
+  recommendation_id:
+    type: string
+  status:
+    type: string
+    enum: [proposed, approved, rejected, deferred]
+  approver:
+    type: string
+  risk_score:
+    type: number
+  evidence:
+    type: array
+    items:
+      type: string
+

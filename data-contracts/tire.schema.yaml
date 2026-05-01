@@ -1,0 +1,17 @@
+id: tire.schema
+version: 0.1.0
+type: object
+required: [compound, pressure_bar, surface_temp_c, carcass_temp_c]
+properties:
+  compound:
+    type: string
+  pressure_bar:
+    type: number
+  surface_temp_c:
+    type: number
+  carcass_temp_c:
+    type: number
+  status:
+    type: string
+    enum: [ok, watch, warning, collapse_risk]
+

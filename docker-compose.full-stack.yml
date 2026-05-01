@@ -1,0 +1,158 @@
+services:
+  orchestrator:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8000"]
+    working_dir: /app
+    volumes:
+      - ./integrations/orchestrator-client:/app:ro
+    ports:
+      - "8001:8000"
+
+  mcp-gateway:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8000"]
+    working_dir: /app
+    volumes:
+      - ./integrations/mcp-client:/app:ro
+    ports:
+      - "8002:8000"
+
+  rag-cag-knowledge-layer:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8000"]
+    working_dir: /app
+    volumes:
+      - ./integrations/rag-cag-client:/app:ro
+    ports:
+      - "8003:8000"
+
+  skills-registry:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8000"]
+    working_dir: /app
+    volumes:
+      - ./integrations/skills-client:/app:ro
+    ports:
+      - "8004:8000"
+
+  documentation-agent:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8000"]
+    working_dir: /app
+    volumes:
+      - ./docs:/app:ro
+    ports:
+      - "8005:8000"
+
+  kdd-data-pipelines:
+    image: python:3.12-alpine
+    command: ["python", "-m", "http.server", "8000"]
+    working_dir: /app
+    volumes:
+      - ./kdd:/app:ro
+    ports:
+      - "8006:8000"
+
+  redpanda:
+    image: redpandadata/redpanda:v24.3.1
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - 512M
+      - --reserve-memory
+      - 0M
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://redpanda:9092
+    ports:
+      - "${REDPANDA_BROKER_PORT:-9092}:9092"
+
+  flink-jobmanager:
+    image: flink:1.19-scala_2.12-java17
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    ports:
+      - "8081:8081"
+
+  flink-taskmanager:
+    image: flink:1.19-scala_2.12-java17
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    depends_on:
+      - flink-jobmanager
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.6
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-race}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-race}
+      POSTGRES_DB: ${POSTGRES_DB:-race_command_center}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio123}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+
+  opentelemetry-collector:
+    image: otel/opentelemetry-collector:0.121.0
+    ports:
+      - "${OTEL_COLLECTOR_PORT:-4317}:4317"
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+
+  grafana:
+    image: grafana/grafana:11.5.2
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+  race-command-center-dashboard:
+    image: nginx:1.27-alpine
+    ports:
+      - "${RACE_DASHBOARD_PORT:-8080}:80"
+    volumes:
+      - ./README.md:/usr/share/nginx/html/README.md:ro
+      - ./docs:/usr/share/nginx/html/docs:ro
+    depends_on:
+      - orchestrator
+      - mcp-gateway
+      - rag-cag-knowledge-layer
+      - skills-registry
+      - prometheus
+      - grafana
+
+volumes:
+  postgres-data:
+  minio-data:
+  grafana-data:
+

@@ -1,0 +1,10 @@
+id: qualifying-optimization-workflow
+name: Qualifying Optimization Workflow
+steps:
+  - id: select_peak_grip_window
+    agent: tire_degradation_agent
+  - id: tune_electronics_for_push_lap
+    agent: crew_chief_agent
+  - id: generate_qualifying_run_plan
+    agent: documentation_agent
+

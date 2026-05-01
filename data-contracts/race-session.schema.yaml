@@ -1,0 +1,20 @@
+id: race-session.schema
+version: 0.1.0
+type: object
+required: [session_id, circuit_id, session_type, started_at]
+properties:
+  session_id:
+    type: string
+  circuit_id:
+    type: string
+  session_type:
+    type: string
+    enum: [test, fp1, fp2, fp3, qualifying, race]
+  started_at:
+    type: string
+    format: date-time
+  rider:
+    type: string
+  bike:
+    type: string
+

@@ -1,0 +1,13 @@
+id: fp2-setup-iteration-workflow
+name: FP2 Setup Iteration Workflow
+steps:
+  - id: compare_fp1_fp2_baselines
+    agent: setup_management_agent
+  - id: estimate_tire_delta
+    agent: tire_degradation_agent
+  - id: propose_setup_iteration
+    agent: crew_chief_agent
+  - id: approve_iteration
+    agent: approval_agent
+    approval_required: true
+

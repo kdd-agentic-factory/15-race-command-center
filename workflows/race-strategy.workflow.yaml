@@ -1,0 +1,13 @@
+id: race-strategy-workflow
+name: Race Strategy Workflow
+steps:
+  - id: simulate_tire_life
+    agent: tire_degradation_agent
+  - id: retrieve_similar_races
+    agent: pattern_discovery_agent
+  - id: propose_engine_map_schedule
+    agent: crew_chief_agent
+  - id: approve_strategy
+    agent: approval_agent
+    approval_required: true
+

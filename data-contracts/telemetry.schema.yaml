@@ -1,0 +1,81 @@
+id: telemetry.schema
+version: 0.1.0
+name: High Frequency Telemetry Core
+description: Physical telemetry contract for live race engineering analysis.
+type: object
+required:
+  - ts_micro
+  - gps_lat
+  - gps_lon
+  - tps
+  - brake_press_front
+  - wheel_speed_f
+  - wheel_speed_r
+properties:
+  ts_micro:
+    type: integer
+    unit: microseconds
+    description: High-precision timestamp.
+  gps_lat:
+    type: number
+    format: float
+    unit: degrees
+    source: RTK GPS
+  gps_lon:
+    type: number
+    format: float
+    unit: degrees
+    source: RTK GPS
+  imu_yaw:
+    type: number
+    format: float
+    unit: degrees
+  imu_pitch:
+    type: number
+    format: float
+    unit: degrees
+  imu_roll:
+    type: number
+    format: float
+    unit: degrees
+    description: Base signal for lean-angle estimation.
+  tps:
+    type: number
+    format: float
+    unit: percent
+    minimum: 0
+    maximum: 100
+    description: Throttle Position Sensor.
+  brake_press_front:
+    type: number
+    format: float
+    unit: bar
+  brake_press_rear:
+    type: number
+    format: float
+    unit: bar
+  susp_travel_f:
+    type: number
+    format: float
+    unit: mm
+  susp_travel_r:
+    type: number
+    format: float
+    unit: mm
+  tire_temp_surface:
+    type: number
+    format: float
+    unit: celsius
+  tire_temp_carcass:
+    type: number
+    format: float
+    unit: celsius
+  wheel_speed_f:
+    type: number
+    format: float
+    unit: km/h
+  wheel_speed_r:
+    type: number
+    format: float
+    unit: km/h
+

@@ -1,0 +1,12 @@
+id: tire-collapse-prediction-workflow
+name: Tire Collapse Prediction Workflow
+steps:
+  - id: compute_spin_ratio
+    agent: tire_degradation_agent
+  - id: compute_thermal_stress
+    agent: tire_degradation_agent
+  - id: detect_collapse_pattern
+    agent: pattern_discovery_agent
+  - id: recommend_mitigation
+    agent: crew_chief_agent
+

@@ -1,0 +1,30 @@
+id: circuit.schema
+version: 0.1.0
+type: object
+required: [circuit_id, name, country, corners]
+properties:
+  circuit_id:
+    type: string
+  name:
+    type: string
+  country:
+    type: string
+  abrasive_index:
+    type: number
+  critical_corners:
+    type: array
+    items:
+      type: string
+  braking_zones:
+    type: array
+    items:
+      type: string
+  acceleration_zones:
+    type: array
+    items:
+      type: string
+  corners:
+    type: array
+    items:
+      type: object
+

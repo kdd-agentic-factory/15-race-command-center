@@ -1,0 +1,15 @@
+id: circuit-specific-parts-workflow
+name: Circuit Specific Parts Workflow
+steps:
+  - id: load_circuit_requirements
+    agent: track_model_agent
+  - id: define_aero_thermal_tradeoff
+    agent: parts_design_agent
+  - id: check_manufacturing_constraints
+    agent: parts_design_agent
+  - id: request_approval
+    agent: approval_agent
+    approval_required: true
+  - id: document_part_evidence
+    agent: documentation_agent
+

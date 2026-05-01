@@ -1,0 +1,17 @@
+id: pattern-discovery-workflow
+name: Pattern Discovery Workflow
+steps:
+  - id: retrieve_sessions
+    agent: pattern_discovery_agent
+    tools:
+      - vector.search_context
+      - minio.load_session_data
+  - id: cluster_by_corner
+    agent: pattern_discovery_agent
+  - id: mine_sequences
+    agent: pattern_discovery_agent
+  - id: explain_candidate_patterns
+    agent: pattern_discovery_agent
+  - id: propose_actions
+    agent: crew_chief_agent
+
