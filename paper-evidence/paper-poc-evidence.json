@@ -1,0 +1,172 @@
+{
+  "paper": {
+    "title": "Structural optimization principles for edge AI in motorsport telemetry",
+    "doi": "10.1038/s41598-026-49736-0",
+    "published": "2026-05-01"
+  },
+  "edge_operating_points": [
+    {
+      "name": "fp16_32b_baseline",
+      "memory_gb": 61.0,
+      "throughput_tok_s": 26.0,
+      "power_w": 295.0,
+      "perplexity_ratio": 1.0,
+      "ipw": 0.0881,
+      "digital_fos": 1.1,
+      "accepted": false
+    },
+    {
+      "name": "int8_32b_balanced",
+      "memory_gb": 34.0,
+      "throughput_tok_s": 44.2,
+      "power_w": 218.0,
+      "perplexity_ratio": 1.035,
+      "ipw": 0.2028,
+      "digital_fos": 1.063,
+      "accepted": false
+    },
+    {
+      "name": "int4_32b_trackside",
+      "memory_gb": 18.0,
+      "throughput_tok_s": 69.9,
+      "power_w": 165.0,
+      "perplexity_ratio": 1.072,
+      "ipw": 0.4236,
+      "digital_fos": 1.026,
+      "accepted": true
+    }
+  ],
+  "accepted_operating_point": "int4_32b_trackside",
+  "telemetry_demo": {
+    "circuit": "jerez",
+    "corner_id": "T05",
+    "lap": 14,
+    "sample_count": 10,
+    "sample_period_micro": 90000,
+    "tire_degradation_prediction": {
+      "rear_tire_status": "warning",
+      "estimated_collapse_lap": 18,
+      "confidence": 0.82,
+      "evidence": [
+        "rear_spin_rising_after_apex",
+        "thermal_stress_above_expected_window"
+      ],
+      "recommendation": [
+        "switch_to_engine_map_2",
+        "increase_rear_rebound_by_2_clicks",
+        "reduce_torque_delivery_in_corners_T05_T08_T13"
+      ]
+    }
+  },
+  "scenarios": [
+    {
+      "id": "S01",
+      "claim": "Low-precision edge AI can be accepted when memory and integrity remain inside the envelope.",
+      "demonstration": "INT4 32B-class operating point fits under 24 GB and keeps Digital FoS above 1.0.",
+      "metrics": [
+        "memory_gb",
+        "digital_fos",
+        "throughput_tok_s",
+        "power_w",
+        "ipw"
+      ],
+      "status": "ready"
+    },
+    {
+      "id": "S02",
+      "claim": "Intelligence-per-Watt captures energy-aware usefulness.",
+      "demonstration": "Compare useful token throughput per watt across FP16, INT8 and INT4 profiles.",
+      "metrics": [
+        "ipw"
+      ],
+      "status": "ready"
+    },
+    {
+      "id": "S03",
+      "claim": "Motorsport telemetry provides an operational edge-AI setting.",
+      "demonstration": "Synthetic high-frequency corner samples drive tire risk and crew-chief recommendations.",
+      "metrics": [
+        "spin_ratio",
+        "thermal_stress",
+        "collapse_lap",
+        "confidence"
+      ],
+      "status": "ready"
+    },
+    {
+      "id": "S04",
+      "claim": "Engineering action must remain gated by evidence and approval.",
+      "demonstration": "Tire warning produces setup/electronics recommendations requiring crew-chief approval.",
+      "metrics": [
+        "risk_status",
+        "approval_required"
+      ],
+      "status": "ready"
+    },
+    {
+      "id": "S05",
+      "claim": "The framework links physical lightweighting and digital lightweighting.",
+      "demonstration": "Circuit-specific part design and INT4 quantization share sensitivity-guided acceptance logic.",
+      "metrics": [
+        "part_constraints",
+        "digital_fos",
+        "approval_required"
+      ],
+      "status": "partial"
+    }
+  ],
+  "repository_coverage": [
+    {
+      "repository": "10-infra-docker",
+      "role": "local runtime",
+      "evidence": [
+        "global compose stack"
+      ]
+    },
+    {
+      "repository": "15-race-command-center",
+      "role": "operational demonstrator",
+      "evidence": [
+        "telemetry contracts",
+        "models",
+        "paper PoC"
+      ]
+    },
+    {
+      "repository": "14-paper-reproducibility-kit",
+      "role": "paper evidence sink",
+      "evidence": [
+        "protocol",
+        "metrics",
+        "results"
+      ]
+    },
+    {
+      "repository": "08-experimentation-lab",
+      "role": "scientific validation",
+      "evidence": [
+        "runtime and traceability experiments"
+      ]
+    },
+    {
+      "repository": "09-observability-platform",
+      "role": "measurement",
+      "evidence": [
+        "Prometheus",
+        "Grafana",
+        "OpenTelemetry"
+      ]
+    }
+  ],
+  "readiness": {
+    "demonstrable_now": true,
+    "engineering_tool_ready": false,
+    "remaining_gaps": [
+      "real MotoGP telemetry adapter",
+      "target edge hardware power measurements",
+      "real GPTQ/AWQ benchmark integration",
+      "physical CFD/FEA validation for parts",
+      "crew-chief user acceptance testing"
+    ]
+  }
+}

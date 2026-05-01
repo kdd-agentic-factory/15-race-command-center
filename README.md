@@ -56,6 +56,7 @@ Useful commands:
 make ps
 make logs
 make validate-global
+make paper-poc
 ```
 
 On Windows, the same launch path is available with:
@@ -72,6 +73,24 @@ make deploy-k8s
 
 This applies the available Kubernetes assets from `11-infra-kubernetes`,
 `01-agent-orchestrator`, `03-rag-cag-knowledge-layer` and this repository.
+
+## Paper Proof of Concept
+
+The paper demonstration can be generated with:
+
+```bash
+make paper-poc
+```
+
+This produces:
+
+- `paper-evidence/paper-poc-evidence.json`
+- `paper-evidence/paper-poc-summary.md`
+
+The PoC maps the paper's edge-AI claims to MotoGP engineering scenarios:
+operating-point selection, Digital Factor of Safety, Intelligence-per-Watt,
+high-frequency telemetry, tire degradation, crew-chief approval and
+circuit-specific part design.
 
 ## Core Modules
 

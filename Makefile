@@ -2,7 +2,7 @@ COMPOSE_GLOBAL=docker compose -f ../10-infra-docker/docker-compose.yml -f ../10-
 COMPOSE_FULL=docker compose -f docker-compose.full-stack.yml
 COMPOSE_RACE=docker compose -f docker-compose.race.yml
 
-.PHONY: start start-race start-local-stack stop stop-race reset logs ps deploy-k8s export-paper-evidence validate validate-global
+.PHONY: start start-race start-local-stack stop stop-race reset logs ps deploy-k8s export-paper-evidence paper-poc validate validate-global
 
 start:
 	$(COMPOSE_GLOBAL) up -d --build
@@ -33,6 +33,9 @@ deploy-k8s:
 
 export-paper-evidence:
 	sh scripts/export-paper-evidence.sh
+
+paper-poc:
+	python scripts/run-paper-poc.py
 
 validate:
 	python -c "import pathlib, yaml; [yaml.safe_load(open(p, encoding='utf-8')) for p in pathlib.Path('.').rglob('*.yml')]; [yaml.safe_load(open(p, encoding='utf-8')) for p in pathlib.Path('.').rglob('*.yaml')]; print('yaml ok')"

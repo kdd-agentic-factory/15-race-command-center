@@ -1,0 +1,51 @@
+id: paper-poc-demonstration-workflow
+name: Paper PoC Demonstration Workflow
+description: Demonstrates the paper claims through the MotoGP race command center.
+steps:
+  - id: load_reference_paper
+    repository: 03-rag-cag-knowledge-layer
+    inputs:
+      - ../s41598-026-49736-0_reference.pdf
+    outputs:
+      - paper_context
+
+  - id: select_edge_ai_operating_points
+    repository: 08-experimentation-lab
+    metrics:
+      - memory_footprint_gb
+      - throughput_tok_s
+      - power_w
+      - digital_factor_of_safety
+      - intelligence_per_watt
+
+  - id: replay_motogp_telemetry
+    repository: 06-kdd-data-pipelines
+    outputs:
+      - telemetry_core_events
+
+  - id: estimate_vehicle_state
+    repository: 15-race-command-center
+    model: models/ekf
+
+  - id: segment_corners
+    repository: 15-race-command-center
+    model: models/curve-segmentation
+
+  - id: predict_tire_degradation
+    repository: 15-race-command-center
+    model: models/tire-degradation
+
+  - id: discover_patterns
+    repository: 15-race-command-center
+    model: models/pattern-mining
+
+  - id: recommend_setup_or_part
+    repository: 15-race-command-center
+    approval_required: true
+
+  - id: export_paper_evidence
+    repository: 14-paper-reproducibility-kit
+    outputs:
+      - paper-evidence/paper-poc-evidence.json
+      - paper-evidence/paper-poc-summary.md
+

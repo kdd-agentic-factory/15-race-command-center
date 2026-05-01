@@ -1,0 +1,64 @@
+id: paper-evidence.schema
+version: 0.1.0
+type: object
+required:
+  - paper
+  - scenarios
+  - repository_coverage
+  - readiness
+properties:
+  paper:
+    type: object
+    required: [doi, title, published]
+    properties:
+      doi:
+        type: string
+      title:
+        type: string
+      published:
+        type: string
+  scenarios:
+    type: array
+    items:
+      type: object
+      required: [id, claim, demonstration, metrics, status]
+      properties:
+        id:
+          type: string
+        claim:
+          type: string
+        demonstration:
+          type: string
+        metrics:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [ready, partial, missing]
+  repository_coverage:
+    type: array
+    items:
+      type: object
+      required: [repository, role, evidence]
+      properties:
+        repository:
+          type: string
+        role:
+          type: string
+        evidence:
+          type: array
+          items:
+            type: string
+  readiness:
+    type: object
+    properties:
+      demonstrable_now:
+        type: boolean
+      engineering_tool_ready:
+        type: boolean
+      remaining_gaps:
+        type: array
+        items:
+          type: string
+
