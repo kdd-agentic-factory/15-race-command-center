@@ -2,6 +2,19 @@ const historyLength = 140;
 const telemetry = [];
 const prediction = [];
 let tick = 0;
+let copilotHistory = [];
+
+const copilotEndpoint =
+  window.RACE_COPILOT_URL || "/copilot-api/integrations/race-command-center/chat";
+
+const copilotQuickQuestions = [
+  "Analiza la degradacion del neumatico trasero en la ultima tanda.",
+  "Compara el setup base con el setup propuesto para clasificacion.",
+  "Explicame por que recomiendas cambiar el rebote trasero.",
+  "Genera un informe pre-GP para el circuito de Jerez.",
+  "Busca patrones de spin similares en sesiones anteriores.",
+  "Que pieza especifica podriamos disenar para mejorar la refrigeracion del freno delantero.",
+];
 
 const repos = [
   "00 governance",
@@ -20,6 +33,7 @@ const repos = [
   "13 ui",
   "14 paper",
   "15 race",
+  "16 copilot",
 ];
 
 const agentEvents = [
@@ -78,6 +92,135 @@ function pushHistory(item) {
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function latestTelemetryContext() {
+  const latest = telemetry.at(-1);
+  if (!latest) return {};
+  return {
+    speed_kmh: Number(latest.speed.toFixed(1)),
+    throttle_pct: Number(latest.tps.toFixed(1)),
+    front_brake_bar: Number(latest.brake.toFixed(2)),
+    lean_deg: Number(latest.lean.toFixed(1)),
+    rear_tire_carcass_c: Number(latest.tire.toFixed(1)),
+    spin_ratio: Number(latest.spin.toFixed(4)),
+    corner_phase: latest.phase,
+  };
+}
+
+function copilotContext() {
+  return {
+    user_role: "crew_chief",
+    active_session_id: "jerez-fp2-2026-05-03",
+    circuit: "Jerez",
+    stint_id: "stint-3",
+    base_setup_id: "setup-base-jerez",
+    proposed_setup_id: "setup-q-jerez",
+    vehicle_context: {
+      car_id: "race-car-01",
+      tire_compound: "soft",
+      telemetry_snapshot: latestTelemetryContext(),
+    },
+    context: {
+      source_panel: "15-race-command-center/apps/web-dashboard",
+      route: "15-race-command-center -> 16-race-ai-copilot -> 03-rag-cag -> 02-mcp-gateway -> 01-agent-orchestrator -> 15 APIs",
+    },
+  };
+}
+
+function renderCopilotMessage(entry) {
+  if (entry.role === "user") {
+    return `<div class="copilot-message user"><span>You</span><p>${escapeHtml(entry.content)}</p></div>`;
+  }
+
+  const evidence = (entry.evidence || [])
+    .map((item) => `<li>${escapeHtml(item.source)} · ${escapeHtml(item.type)} · confidence ${escapeHtml(item.confidence)}</li>`)
+    .join("");
+  const tools = (entry.tool_calls || [])
+    .map((tool) => `<li>${escapeHtml(tool.tool)} · ${escapeHtml(tool.status)}${tool.approval_required ? " · approval" : ""}</li>`)
+    .join("");
+
+  return `
+    <div class="copilot-message assistant">
+      <span>AI Copilot</span>
+      <p>${escapeHtml(entry.content)}</p>
+      <div class="copilot-meta">
+        <strong>Approval: ${escapeHtml(entry.approval_status || "not_required")}</strong>
+        ${evidence ? `<ol>${evidence}</ol>` : ""}
+        ${tools ? `<ol>${tools}</ol>` : ""}
+      </div>
+    </div>
+  `;
+}
+
+function renderCopilotChat() {
+  const chat = document.getElementById("copilot-chat");
+  if (!chat) return;
+  chat.innerHTML = copilotHistory.map(renderCopilotMessage).join("");
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function appendCopilotEntry(entry) {
+  copilotHistory.push(entry);
+  if (copilotHistory.length > 12) copilotHistory = copilotHistory.slice(-12);
+  renderCopilotChat();
+}
+
+async function askCopilot(query) {
+  const trimmed = query.trim();
+  if (!trimmed) return;
+
+  appendCopilotEntry({ role: "user", content: trimmed });
+  setText("copilot-status", "requesting evidence route");
+
+  const payload = {
+    query: trimmed,
+    history: copilotHistory
+      .filter((entry) => entry.role === "user" || entry.role === "assistant")
+      .slice(-6)
+      .map((entry) => ({ role: entry.role, content: entry.content })),
+    ...copilotContext(),
+  };
+
+  try {
+    const response = await fetch(copilotEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    appendCopilotEntry({
+      role: "assistant",
+      content: data.message,
+      evidence: data.evidence,
+      tool_calls: data.tool_calls,
+      approval_status: data.approval_status,
+    });
+    setText("copilot-status", data.approval_status === "required" ? "human approval required" : "evidence route proposed");
+  } catch (error) {
+    appendCopilotEntry({
+      role: "assistant",
+      content: `Copilot endpoint unavailable at ${copilotEndpoint}. ${error.message}.`,
+      evidence: [{ source: "race-command-center:web-dashboard", type: "session", confidence: 0 }],
+      tool_calls: [],
+      approval_status: "blocked",
+    });
+    setText("copilot-status", "copilot unavailable");
+  }
 }
 
 function updateMetrics(item) {
@@ -158,6 +301,9 @@ function renderCharts() {
 function renderStatic() {
   document.getElementById("repo-stack").innerHTML = repos.map((repo) => `<span>${repo}</span>`).join("");
   document.getElementById("agent-log").innerHTML = agentEvents.map((event) => `<li>${event}</li>`).join("");
+  document.getElementById("quick-questions").innerHTML = copilotQuickQuestions
+    .map((question) => `<button type="button" class="quick-question">${escapeHtml(question)}</button>`)
+    .join("");
 }
 
 function bindTabs() {
@@ -172,6 +318,33 @@ function bindTabs() {
   });
 }
 
+function bindCopilot() {
+  const form = document.getElementById("copilot-form");
+  const query = document.getElementById("copilot-query");
+  if (!form || !query) return;
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    askCopilot(query.value);
+  });
+
+  document.querySelectorAll(".quick-question").forEach((button) => {
+    button.addEventListener("click", () => {
+      query.value = button.textContent;
+      askCopilot(query.value);
+    });
+  });
+
+  appendCopilotEntry({
+    role: "assistant",
+    content:
+      "Ready to route Command Center questions through 16-race-ai-copilot with RAG/CAG, MCP, orchestrator metadata, and approval gates.",
+    evidence: [{ source: "race-command-center:panel", type: "session", confidence: 0 }],
+    tool_calls: [],
+    approval_status: "not_required",
+  });
+}
+
 function frame() {
   tick += 1;
   const item = sampleTelemetry();
@@ -182,6 +355,7 @@ function frame() {
 
 renderStatic();
 bindTabs();
+bindCopilot();
 for (let i = 0; i < historyLength; i += 1) frame();
 setInterval(frame, 100);
 window.addEventListener("resize", renderCharts);

@@ -27,6 +27,7 @@
         <button class="tab" data-tab="agents">Agents</button>
         <button class="tab" data-tab="prediction">RNN-PINN</button>
         <button class="tab" data-tab="parts">Parts</button>
+        <button class="tab" data-tab="copilot">AI Copilot</button>
         <button class="tab" data-tab="evidence">Paper Evidence</button>
       </nav>
 
@@ -258,6 +259,58 @@
                 <span class="badge danger">human gate</span>
               </div>
               <p class="callout">Rear spin is rising after apex under high carcass temperature. Approve engine map 2 after lap 14, add two clicks rear rebound, and evaluate brake duct V1 before FP3.</p>
+            </article>
+          </section>
+        </section>
+
+        <section class="view" id="view-copilot">
+          <section class="dashboard-grid">
+            <article class="panel wide copilot-panel">
+              <div class="panel-head">
+                <h2>AI Copilot</h2>
+                <span id="copilot-status">16-race-ai-copilot ready</span>
+              </div>
+              <div class="copilot-layout">
+                <div class="copilot-chat" id="copilot-chat" aria-live="polite"></div>
+                <form class="copilot-form" id="copilot-form">
+                  <textarea id="copilot-query" rows="3" placeholder="Ask the race engineering copilot...">Analiza la degradacion del neumatico trasero en la ultima tanda.</textarea>
+                  <button type="submit">Ask</button>
+                </form>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Race Context</h2>
+                <span>sent with request</span>
+              </div>
+              <dl class="kv">
+                <div><dt>session</dt><dd id="copilot-session">jerez-fp2-2026-05-03</dd></div>
+                <div><dt>circuit</dt><dd id="copilot-circuit">Jerez</dd></div>
+                <div><dt>stint</dt><dd id="copilot-stint">stint-3</dd></div>
+                <div><dt>base setup</dt><dd id="copilot-base-setup">setup-base-jerez</dd></div>
+                <div><dt>proposed setup</dt><dd id="copilot-proposed-setup">setup-q-jerez</dd></div>
+              </dl>
+            </article>
+            <article class="panel wide">
+              <div class="panel-head">
+                <h2>Quick Questions</h2>
+                <span>crew-chief prompts</span>
+              </div>
+              <div class="quick-questions" id="quick-questions"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h2>Governed Route</h2>
+                <span class="badge warning">approval gate</span>
+              </div>
+              <div class="route-stack">
+                <span>15 Command Center</span>
+                <span>16 AI Copilot</span>
+                <span>03 RAG/CAG</span>
+                <span>02 MCP Gateway</span>
+                <span>01 Orchestrator</span>
+                <span>15 APIs</span>
+              </div>
             </article>
           </section>
         </section>

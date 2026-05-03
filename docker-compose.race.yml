@@ -6,10 +6,29 @@ services:
       - "${RACE_DASHBOARD_PORT:-8090}:80"
     volumes:
       - ./apps/web-dashboard:/usr/share/nginx/html:ro
+      - ./apps/web-dashboard/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./README.md:/usr/share/nginx/html/README.md:ro
       - ./docs:/usr/share/nginx/html/docs:ro
+    depends_on:
+      - race-ai-copilot-api
     labels:
       app.kubernetes.io/name: race-command-center
+
+  race-ai-copilot-api:
+    build:
+      context: ../16-race-ai-copilot
+    container_name: race-ai-copilot-api
+    ports:
+      - "${RACE_AI_COPILOT_PORT:-8050}:8050"
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      MCP_GATEWAY_URL: http://mcp-gateway:8010
+      RAG_CAG_URL: http://knowledge-layer:8020
+      SKILLS_URL: http://skills-registry:8030
+      ORCHESTRATOR_URL: http://orchestrator:8000
+      QDRANT_URL: http://qdrant:6333
+      POSTGRES_URL: postgresql://kdd:kdd@postgres:5432/kdd
+      COPILOT_DEFAULT_MODEL: qwen2.5:7b
 
   race-session-api:
     image: python:3.12-alpine

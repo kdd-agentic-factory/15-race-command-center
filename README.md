@@ -13,6 +13,7 @@ launcher for the complete repository organization. It acts as:
 - Circuit-specific parts design studio.
 - High-frequency telemetry console.
 - Pattern discovery tool.
+- AI Copilot panel backed by `16-race-ai-copilot`.
 - Exploitation layer for Edge AI, KDD pipelines, agents, RAG/CAG, MCP and observability.
 
 ## Quick Start
@@ -35,7 +36,7 @@ make start-race
 
 The global stack is designed to launch:
 
-- All 15 repositories as runtime services or visible repository surfaces.
+- All 16 repositories as runtime services or visible repository surfaces.
 - Orchestrator from the infrastructure stack.
 - MCP Gateway from the infrastructure stack.
 - RAG/CAG Knowledge Layer from the infrastructure stack.
@@ -49,6 +50,7 @@ The global stack is designed to launch:
 - OpenTelemetry-compatible endpoint from the infrastructure stack.
 - Observability repository surface.
 - Race Command Center Dashboard
+- Race AI Copilot API
 
 Useful commands:
 
@@ -108,6 +110,8 @@ It visualizes synthetic high-frequency telemetry in real time and connects the
 paper plus the linked advanced command-center study to operational modules:
 Edge AI, Edge-to-Lakehouse streaming, multi-agent orchestration, SDD governance,
 RNN-PINN/UKF-M prediction, crew-chief decisions and circuit-specific parts.
+The `AI Copilot` tab sends session, stint, setup and live telemetry context to
+`16-race-ai-copilot` through the same-origin `/copilot-api` reverse proxy.
 
 ## Core Modules
 
@@ -118,6 +122,7 @@ RNN-PINN/UKF-M prediction, crew-chief decisions and circuit-specific parts.
 - `apps/setup-change-simulator`: setup comparison and what-if analysis.
 - `apps/track-pattern-explorer`: pattern discovery UI.
 - `apps/parts-design-studio`: circuit-specific parts design workflow.
+- `AI Copilot` tab in `apps/web-dashboard`: governed chat interface for telemetry, setup, pre-GP reporting, pattern discovery and circuit-specific part design.
 - `models/ekf`: sensor fusion and state estimation.
 - `models/curve-segmentation`: braking/apex/drive micro-segmentation.
 - `models/tire-degradation`: tire collapse risk estimation.
@@ -143,6 +148,7 @@ The command center operates the definitive organization:
 - `13-ui-command-center`: UI components and design system.
 - `14-paper-reproducibility-kit`: paper and reproducibility.
 - `15-race-command-center`: final operational dashboard and global launcher.
+- `16-race-ai-copilot`: local LLM race engineering copilot governed by RAG/CAG, MCP, Skills, orchestrator metadata and KDD policies.
 
 ## Paper Fit
 
