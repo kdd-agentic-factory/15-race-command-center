@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-zinc-950 text-zinc-100 antialiased;
+    font-family: "Inter", system-ui, sans-serif;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-zinc-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-zinc-700;
+  }
+}
+
+@layer utilities {
+  .panel {
+    @apply rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5;
+  }
+
+  .eyebrow {
+    @apply text-xs uppercase tracking-[0.3em] text-red-500;
+  }
+
+  .badge-ok {
+    @apply rounded-full bg-emerald-950 px-2.5 py-0.5 text-xs text-emerald-400;
+  }
+
+  .badge-warn {
+    @apply rounded-full bg-amber-950 px-2.5 py-0.5 text-xs text-amber-400;
+  }
+
+  .badge-danger {
+    @apply rounded-full bg-red-950 px-2.5 py-0.5 text-xs text-red-400;
+  }
+
+  .badge-neutral {
+    @apply rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs text-zinc-300;
+  }
+}

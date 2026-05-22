@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: race-command-center
+  namespace: kdd-race
+  labels:
+    app: race-command-center
+    version: "0.1.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: race-command-center
+  template:
+    metadata:
+      labels:
+        app: race-command-center
+    spec:
+      containers:
+        - name: race-command-center
+          image: ghcr.io/kdd-agentic-race-engineering/race-command-center:latest
+          ports:
+            - containerPort: 8150
+              name: http
+          envFrom:
+            - configMapRef:
+                name: race-command-center-config
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8150
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8150
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"

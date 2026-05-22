@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "race-command-center/decision",
+  "title": "CrewChiefDecision",
+  "type": "object",
+  "required": ["decision_id", "title", "decision_type", "risk_level"],
+  "properties": {
+    "decision_id": { "type": "string" },
+    "session_id": { "type": "string" },
+    "recommendation_id": { "type": "string" },
+    "title": { "type": "string" },
+    "decision_type": { "type": "string" },
+    "risk_level": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "proposed", "simulation_required", "simulation_completed", "crew_chief_review", "approved", "rejected", "applied", "archived"]
+    },
+    "proposed_by": { "type": "string" },
+    "approved_by": { "type": "string" },
+    "evidence": { "type": "array" },
+    "simulation_id": { "type": "string" },
+    "workflow_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "decided_at": { "type": "string", "format": "date-time" },
+    "notes": { "type": "string" }
+  }
+}

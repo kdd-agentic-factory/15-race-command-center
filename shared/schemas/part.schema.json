@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "race-command-center/part",
+  "title": "CircuitSpecificPart",
+  "type": "object",
+  "required": ["part_id", "name", "part_type", "target_circuit_id", "problem_statement", "technical_hypothesis", "expected_impact"],
+  "properties": {
+    "part_id": { "type": "string" },
+    "name": { "type": "string" },
+    "part_type": { "type": "string", "enum": ["cooling", "aerodynamic", "thermal_management", "structural", "electronics", "other"] },
+    "target_circuit_id": { "type": "string" },
+    "problem_statement": { "type": "string" },
+    "technical_hypothesis": { "type": "string" },
+    "expected_impact": { "type": "string" },
+    "material": { "type": "string" },
+    "estimated_weight_g": { "type": "number", "minimum": 0 },
+    "manufacturing_method": { "type": "string" },
+    "risk_level": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "status": { "type": "string", "enum": ["concept", "designed", "simulated", "approved_for_manufacturing", "manufactured", "mounted", "tested", "rejected", "archived"] },
+    "simulation_id": { "type": "string" },
+    "evidence": { "type": "array" },
+    "approval_status": { "type": "string" },
+    "metadata": { "type": "object" }
+  }
+}

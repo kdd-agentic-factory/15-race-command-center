@@ -1,0 +1,7 @@
+TELEMETRY_SAMPLE = "telemetry.sample"
+ALERT_FIRED = "alert.fired"
+DECISION_PROPOSED = "decision.proposed"
+DECISION_APPROVED = "decision.approved"
+SESSION_STARTED = "session.started"
+SESSION_CLOSED = "session.closed"
+PART_STATUS_CHANGED = "part.status_changed"

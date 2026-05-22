@@ -2,8 +2,17 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: race-command-center-config
-  namespace: race-command-center
+  namespace: kdd-race
 data:
-  RACE_MODE: "paper-demo"
-  TELEMETRY_TOPIC: "telemetry.high_frequency"
-
+  KDD_PIPELINES_URL: "http://kdd-data-pipelines.kdd-data.svc.cluster.local:8060"
+  COPILOT_URL: "http://race-ai-copilot.kdd-ai.svc.cluster.local:8160"
+  DIGITAL_TWIN_URL: "http://digital-twin.kdd-race.svc.cluster.local:8170"
+  DOCUMENTATION_AGENT_URL: "http://documentation-agent.kdd-control.svc.cluster.local:8040"
+  ORCHESTRATOR_URL: "http://agent-orchestrator.kdd-control.svc.cluster.local:8000"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.kdd-observability.svc.cluster.local:4317"
+  ENABLE_MOCK_MODE: "false"
+  ENABLE_LIVE_TELEMETRY: "true"
+  ENABLE_COPILOT: "true"
+  ENABLE_DIGITAL_TWIN: "true"
+  ENABLE_PARTS_MODULE: "true"
+  ENABLE_PAPER_EVIDENCE_EXPORT: "true"
