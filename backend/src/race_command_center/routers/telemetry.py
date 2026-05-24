@@ -1,10 +1,20 @@
+from __future__ import annotations
+
 import random
 import time
-from fastapi import APIRouter
-from race_command_center.models.telemetry import TelemetrySample
+from typing import Annotated
+
+from fastapi import APIRouter, Body, HTTPException, Query
+
+from race_command_center.database import load_telemetry_by_session, save_telemetry_samples
+from race_command_center.models.telemetry import TelemetrySample, TelemetryWindow
 
 router = APIRouter()
 
+
+# ---------------------------------------------------------------------------
+# Dev / mock endpoints (kept for local testing without live data sources)
+# ---------------------------------------------------------------------------
 
 def _mock_sample(session_id: str | None = None) -> TelemetrySample:
     tick = time.time() % 110
@@ -33,10 +43,50 @@ def _mock_sample(session_id: str | None = None) -> TelemetrySample:
 
 
 @router.get("/mock")
-async def mock_telemetry(session_id: str | None = None):
+async def mock_telemetry(session_id: str | None = None) -> TelemetrySample:
     return _mock_sample(session_id)
 
 
 @router.get("/mock/batch")
-async def mock_telemetry_batch(session_id: str | None = None, count: int = 10):
+async def mock_telemetry_batch(session_id: str | None = None, count: int = 10) -> dict:
     return {"samples": [_mock_sample(session_id) for _ in range(min(count, 100))]}
+
+
+# ---------------------------------------------------------------------------
+# Real telemetry endpoints — DB-backed
+# ---------------------------------------------------------------------------
+
+@router.post("/samples/{session_id}")
+async def ingest_telemetry(
+    session_id: str,
+    samples: Annotated[list[dict], Body()],
+) -> dict:
+    """Ingest one or more telemetry samples for a session (from edge adapter or test harness)."""
+    if not samples:
+        raise HTTPException(status_code=400, detail="samples list must not be empty")
+    saved = await save_telemetry_samples(session_id=session_id, samples=samples)
+    return {"session_id": session_id, "saved": saved}
+
+
+@router.post("/sample/{session_id}")
+async def ingest_single(
+    session_id: str,
+    sample: TelemetrySample,
+) -> dict:
+    """Ingest a single typed TelemetrySample for a session."""
+    data = sample.model_dump(exclude_none=True)
+    data.setdefault("session_id", session_id)
+    data.setdefault("ts", time.time())
+    await save_telemetry_samples(session_id=session_id, samples=[data])
+    return {"session_id": session_id, "saved": 1}
+
+
+@router.get("/sessions/{session_id}")
+async def get_telemetry(
+    session_id: str,
+    limit: int = Query(default=200, ge=1, le=2000),
+) -> TelemetryWindow:
+    """Return the most recent telemetry samples for a session from the DB."""
+    raw = await load_telemetry_by_session(session_id=session_id, limit=limit)
+    samples = [TelemetrySample.model_validate(s) for s in raw]
+    return TelemetryWindow(session_id=session_id, samples=samples)

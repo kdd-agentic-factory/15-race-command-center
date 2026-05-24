@@ -92,6 +92,24 @@ CREATE TABLE IF NOT EXISTS parts (
     installed_at TEXT,
     metadata     TEXT NOT NULL DEFAULT '{}'
 );
+
+CREATE TABLE IF NOT EXISTS simulation_results (
+    simulation_id    TEXT PRIMARY KEY,
+    baseline_setup_id TEXT NOT NULL,
+    session_id       TEXT,
+    circuit_id       TEXT,
+    result_json      TEXT NOT NULL DEFAULT '{}',
+    created_at       TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS telemetry_samples (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL,
+    ts         REAL NOT NULL,
+    sample_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_telem_session ON telemetry_samples (session_id);
 """
 
 
@@ -107,3 +125,70 @@ async def init_db() -> None:
 async def get_session() -> AsyncSession:  # type: ignore[misc]
     async with AsyncSessionLocal() as session:
         yield session
+
+
+async def save_simulation_result(simulation_id: str, baseline_setup_id: str, result: dict, session_id: str | None = None, circuit_id: str | None = None) -> None:
+    from datetime import datetime, timezone
+    ts = datetime.now(timezone.utc).isoformat()
+    async with AsyncSessionLocal() as db:
+        await db.execute(
+            text("""
+                INSERT INTO simulation_results (simulation_id, baseline_setup_id, session_id, circuit_id, result_json, created_at)
+                VALUES (:sim_id, :baseline, :session_id, :circuit_id, :result_json, :ts)
+                ON CONFLICT (simulation_id) DO UPDATE SET result_json = :result_json, created_at = :ts
+            """) if not _is_sqlite else text("""
+                INSERT OR REPLACE INTO simulation_results (simulation_id, baseline_setup_id, session_id, circuit_id, result_json, created_at)
+                VALUES (:sim_id, :baseline, :session_id, :circuit_id, :result_json, :ts)
+            """),
+            {"sim_id": simulation_id, "baseline": baseline_setup_id, "session_id": session_id, "circuit_id": circuit_id, "result_json": json.dumps(result), "ts": ts},
+        )
+        await db.commit()
+
+
+async def load_simulation_result(simulation_id: str) -> dict | None:
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            text("SELECT result_json FROM simulation_results WHERE simulation_id = :sim_id"),
+            {"sim_id": simulation_id},
+        )
+        row = result.fetchone()
+    return json.loads(row.result_json) if row else None
+
+
+async def list_simulation_results(session_id: str | None = None, limit: int = 50) -> list[dict]:
+    async with AsyncSessionLocal() as db:
+        if session_id:
+            result = await db.execute(
+                text("SELECT result_json FROM simulation_results WHERE session_id = :sid ORDER BY created_at DESC LIMIT :limit"),
+                {"sid": session_id, "limit": limit},
+            )
+        else:
+            result = await db.execute(
+                text("SELECT result_json FROM simulation_results ORDER BY created_at DESC LIMIT :limit"),
+                {"limit": limit},
+            )
+        rows = result.fetchall()
+    return [json.loads(r.result_json) for r in rows]
+
+
+async def save_telemetry_samples(session_id: str, samples: list[dict]) -> int:
+    from datetime import datetime, timezone
+    ts = datetime.now(timezone.utc).isoformat()
+    async with AsyncSessionLocal() as db:
+        for s in samples:
+            await db.execute(
+                text("INSERT INTO telemetry_samples (session_id, ts, sample_json, created_at) VALUES (:sid, :ts_val, :sample, :ts)"),
+                {"sid": session_id, "ts_val": s.get("ts", 0.0), "sample": json.dumps(s), "ts": ts},
+            )
+        await db.commit()
+    return len(samples)
+
+
+async def load_telemetry_by_session(session_id: str, limit: int = 500) -> list[dict]:
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            text("SELECT sample_json FROM telemetry_samples WHERE session_id = :sid ORDER BY ts DESC LIMIT :limit"),
+            {"sid": session_id, "limit": limit},
+        )
+        rows = result.fetchall()
+    return [json.loads(r.sample_json) for r in reversed(rows)]

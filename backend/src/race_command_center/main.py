@@ -10,6 +10,27 @@ from fastapi.staticfiles import StaticFiles
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from race_command_center.database import init_db
+
+
+def _configure_otel(app: FastAPI, service_name: str = "race-command-center") -> None:
+    endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
+    if not endpoint:
+        return
+    try:
+        from opentelemetry import trace
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+        from opentelemetry.sdk.resources import Resource
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+        provider = TracerProvider(resource=Resource.create({"service.name": service_name}))
+        provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=endpoint, insecure=True)))
+        trace.set_tracer_provider(provider)
+        FastAPIInstrumentor.instrument_app(app)
+        logging.getLogger(__name__).info("OTEL tracing enabled → %s", endpoint)
+    except Exception as exc:
+        logging.getLogger(__name__).warning("OTEL setup failed (non-fatal): %s", exc)
 from race_command_center.routers import (
     circuits,
     copilot,
@@ -111,6 +132,8 @@ app.include_router(copilot.router, prefix="/copilot", tags=["copilot"])
 app.include_router(simulation.router, prefix="/simulation", tags=["simulation"])
 app.include_router(reports.router, prefix="/reports", tags=["reports"])
 app.include_router(websocket.router, tags=["websocket"])
+
+_configure_otel(app)
 
 static_dir = pathlib.Path(__file__).parent.parent.parent.parent / "static"
 if static_dir.exists():

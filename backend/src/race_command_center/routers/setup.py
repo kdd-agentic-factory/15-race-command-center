@@ -1,63 +1,43 @@
-from fastapi import APIRouter
+import json
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from race_command_center.database import get_session
 from race_command_center.models.setup import BikeSetup, SetupDiff
-from race_command_center.utils.ids import new_id
+from race_command_center.utils.time import utcnow_iso
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
-_setups: dict[str, BikeSetup] = {
-    "setup-base-jerez": BikeSetup(
-        setup_id="setup-base-jerez",
-        name="Baseline Jerez",
-        front_preload=12.0, rear_preload=14.0,
-        front_compression=18.0, rear_compression=20.0,
-        front_rebound=16.0, rear_rebound=18.0,
-        engine_map="map-1", traction_control_map="tc-3",
-        anti_wheelie_map="aw-2", engine_brake_map="eb-2",
-        front_tire_pressure=1.95, rear_tire_pressure=1.85,
-        front_compound="medium", rear_compound="soft",
-        aero_package="A", status="approved",
-    ),
-    "setup-q-jerez": BikeSetup(
-        setup_id="setup-q-jerez",
-        name="Qualifying Jerez",
-        front_preload=12.0, rear_preload=15.0,
-        front_compression=18.0, rear_compression=21.0,
-        front_rebound=16.0, rear_rebound=20.0,
-        engine_map="map-2", traction_control_map="tc-2",
-        anti_wheelie_map="aw-1", engine_brake_map="eb-2",
-        front_tire_pressure=1.90, rear_tire_pressure=1.80,
-        front_compound="soft", rear_compound="soft",
-        aero_package="A", status="proposed",
-    ),
-}
+_SETUP_COLS = [f for f in BikeSetup.model_fields if f not in ("custom_parts",)]
+
+
+def _row_to_setup(row) -> BikeSetup:
+    d = dict(row._mapping)
+    d["custom_parts"] = json.loads(d.get("custom_parts") or "[]")
+    return BikeSetup(**d)
 
 
 @router.get("")
-async def list_setups():
-    return {"setups": list(_setups.values()), "total": len(_setups)}
-
-
-@router.get("/{setup_id}")
-async def get_setup(setup_id: str):
-    setup = _setups.get(setup_id)
-    if not setup:
-        return {"setup_id": setup_id, "status": "not_found", "mode": "mock"}
-    return setup
-
-
-@router.post("", status_code=201)
-async def create_setup(payload: BikeSetup):
-    _setups[payload.setup_id] = payload
-    return payload
+async def list_setups(db: AsyncSession = Depends(get_session)):
+    result = await db.execute(text("SELECT * FROM setups ORDER BY created_at DESC"))
+    rows = result.fetchall()
+    setups = [_row_to_setup(r) for r in rows]
+    return {"setups": setups, "total": len(setups)}
 
 
 @router.get("/diff/{baseline_id}/{proposed_id}")
-async def setup_diff(baseline_id: str, proposed_id: str):
-    baseline = _setups.get(baseline_id)
-    proposed = _setups.get(proposed_id)
-    if not baseline or not proposed:
-        return {"changes": [], "mode": "mock", "note": "setup not found"}
+async def setup_diff(baseline_id: str, proposed_id: str, db: AsyncSession = Depends(get_session)):
+    b_row = (await db.execute(text("SELECT * FROM setups WHERE setup_id = :id"), {"id": baseline_id})).fetchone()
+    p_row = (await db.execute(text("SELECT * FROM setups WHERE setup_id = :id"), {"id": proposed_id})).fetchone()
+    if not b_row or not p_row:
+        raise HTTPException(status_code=404, detail="One or both setups not found")
 
+    baseline = _row_to_setup(b_row)
+    proposed = _row_to_setup(p_row)
     changes = []
     for field in BikeSetup.model_fields:
         bval = getattr(baseline, field)
@@ -72,3 +52,33 @@ async def setup_diff(baseline_id: str, proposed_id: str):
         risk_level="medium" if changes else "low",
         summary=f"{len(changes)} parameter(s) changed",
     )
+
+
+@router.get("/{setup_id}")
+async def get_setup(setup_id: str, db: AsyncSession = Depends(get_session)):
+    result = await db.execute(text("SELECT * FROM setups WHERE setup_id = :id"), {"id": setup_id})
+    row = result.fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Setup {setup_id!r} not found")
+    return _row_to_setup(row)
+
+
+@router.post("", status_code=201)
+async def create_setup(payload: BikeSetup, db: AsyncSession = Depends(get_session)):
+    now = utcnow_iso()
+    data = payload.model_dump()
+    data["custom_parts"] = json.dumps(data.get("custom_parts", []))
+    data["created_at"] = now
+    data["updated_at"] = now
+
+    cols = list(data.keys())
+    placeholders = ", ".join(f":{c}" for c in cols)
+    col_names = ", ".join(cols)
+
+    await db.execute(
+        text(f"INSERT INTO setups ({col_names}) VALUES ({placeholders}) ON CONFLICT(setup_id) DO NOTHING"),
+        data,
+    )
+    await db.commit()
+    logger.info("Setup created: %s (%s)", payload.setup_id, payload.name)
+    return payload
