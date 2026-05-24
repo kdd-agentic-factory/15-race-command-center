@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from race_command_center.database import init_db
+from race_command_center.insforge_auth import InsForgeAuthMiddleware
 from race_command_center.rate_limit import RateLimitMiddleware
 
 
@@ -33,6 +34,7 @@ def _configure_otel(app: FastAPI, service_name: str = "race-command-center") -> 
     except Exception as exc:
         logging.getLogger(__name__).warning("OTEL setup failed (non-fatal): %s", exc)
 from race_command_center.routers import (
+    auth,
     circuits,
     copilot,
     decisions,
@@ -104,6 +106,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(InsForgeAuthMiddleware)
 app.add_middleware(RateLimitMiddleware, calls_per_minute=int(os.getenv("RATE_LIMIT_PER_MINUTE", "120")))
 
 
@@ -122,6 +125,7 @@ async def metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
+app.include_router(auth.router)
 app.include_router(health.router, tags=["health"])
 app.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
 app.include_router(telemetry.router, prefix="/telemetry", tags=["telemetry"])
