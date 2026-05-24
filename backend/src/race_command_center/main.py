@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from race_command_center.database import init_db
+from race_command_center.rate_limit import RateLimitMiddleware
 
 
 def _configure_otel(app: FastAPI, service_name: str = "race-command-center") -> None:
@@ -103,6 +104,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(RateLimitMiddleware, calls_per_minute=int(os.getenv("RATE_LIMIT_PER_MINUTE", "120")))
 
 
 @app.middleware("http")
