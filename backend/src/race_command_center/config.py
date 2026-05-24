@@ -6,6 +6,7 @@ class Settings(BaseSettings):
 
     app_env: str = "local"
     backend_port: int = 8150
+    database_url: str = "sqlite+aiosqlite:///./race_command_center.db"
 
     kdd_pipelines_url: str = "http://localhost:8060"
     copilot_url: str = "http://localhost:8160"

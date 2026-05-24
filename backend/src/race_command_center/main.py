@@ -1,28 +1,75 @@
+import logging
 import os
-from fastapi import FastAPI
+import pathlib
+from contextlib import asynccontextmanager
+
+import structlog
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import pathlib
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
+from race_command_center.database import init_db
 from race_command_center.routers import (
-    health,
-    sessions,
-    telemetry,
     circuits,
-    setup,
+    copilot,
+    decisions,
+    health,
     parts,
     pregp,
-    decisions,
-    copilot,
-    simulation,
     reports,
+    sessions,
+    setup,
+    simulation,
+    telemetry,
     websocket,
 )
 
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO"),
+    format="%(asctime)s %(name)s %(levelname)s %(message)s",
+)
+structlog.configure(
+    processors=[
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.JSONRenderer(),
+    ],
+    wrapper_class=structlog.stdlib.BoundLogger,
+    logger_factory=structlog.stdlib.LoggerFactory(),
+)
+
+logger = logging.getLogger(__name__)
+
+REQUEST_COUNT = Counter(
+    "rcc_http_requests_total",
+    "Total HTTP requests",
+    ["method", "path", "status_code"],
+)
+REQUEST_LATENCY = Histogram(
+    "rcc_http_request_duration_seconds",
+    "HTTP request duration",
+    ["method", "path"],
+)
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    await init_db()
+    logger.info("Race Command Center started (DB ready)")
+    yield
+    logger.info("Race Command Center shutting down")
+
+
 app = FastAPI(
     title="Race Command Center",
-    version="0.1.0",
-    description="Operational dashboard for the KDD-governed agentic race engineering platform.",
+    version="0.2.0",
+    description=(
+        "Operational dashboard for the KDD-governed agentic race engineering platform. "
+        "All data is persisted to PostgreSQL (SQLite fallback for local dev)."
+    ),
+    lifespan=lifespan,
 )
 
 _allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
@@ -35,6 +82,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    path = request.url.path
+    method = request.method
+    with REQUEST_LATENCY.labels(method=method, path=path).time():
+        response = await call_next(request)
+    REQUEST_COUNT.labels(method=method, path=path, status_code=response.status_code).inc()
+    return response
+
+
+@app.get("/metrics", include_in_schema=False)
+async def metrics():
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
 
 app.include_router(health.router, tags=["health"])
 app.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
