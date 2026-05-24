@@ -14,7 +14,8 @@ FROM python:3.11-slim AS backend
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app/src
 
 COPY backend/pyproject.toml ./pyproject.toml
 COPY backend/src ./src

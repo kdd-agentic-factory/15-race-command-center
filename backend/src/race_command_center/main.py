@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -24,10 +25,13 @@ app = FastAPI(
     description="Operational dashboard for the KDD-governed agentic race engineering platform.",
 )
 
+_allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+_origins = [o.strip() for o in _allowed_origins if o.strip()] or ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_origins,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
