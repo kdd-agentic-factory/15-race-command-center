@@ -2,9 +2,10 @@
 import os
 import pathlib
 
-# Must be set before race_command_center.database is first imported.
+# Must be set before race_command_center is first imported.
 _TEST_DB = pathlib.Path(__file__).parent / "test_rcc.db"
 os.environ.setdefault("DATABASE_URL", f"sqlite+aiosqlite:///{_TEST_DB}")
+os.environ.setdefault("RATE_LIMIT_PER_MINUTE", "99999")
 
 import pytest
 from fastapi.testclient import TestClient
