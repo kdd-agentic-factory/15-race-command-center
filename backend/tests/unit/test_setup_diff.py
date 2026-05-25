@@ -1,11 +1,7 @@
 import pytest
-from fastapi.testclient import TestClient
-from race_command_center.main import app
-
-client = TestClient(app)
 
 
-def test_setup_diff_detects_changes():
+def test_setup_diff_detects_changes(client):
     response = client.get("/setup/diff/setup-base-jerez/setup-q-jerez")
     assert response.status_code == 200
     data = response.json()
@@ -13,7 +9,7 @@ def test_setup_diff_detects_changes():
     assert len(data["changes"]) > 0
 
 
-def test_setup_diff_same_setup():
+def test_setup_diff_same_setup(client):
     response = client.get("/setup/diff/setup-base-jerez/setup-base-jerez")
     assert response.status_code == 200
     data = response.json()
@@ -21,7 +17,7 @@ def test_setup_diff_same_setup():
     assert data["risk_level"] == "low"
 
 
-def test_setup_diff_unknown_setup():
+def test_setup_diff_unknown_setup(client):
     response = client.get("/setup/diff/nonexistent/setup-base-jerez")
     assert response.status_code == 200
     data = response.json()

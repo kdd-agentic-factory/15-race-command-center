@@ -1,11 +1,7 @@
 import pytest
-from fastapi.testclient import TestClient
-from race_command_center.main import app
-
-client = TestClient(app)
 
 
-def test_list_parts_returns_mock_data():
+def test_list_parts_returns_mock_data(client):
     response = client.get("/parts")
     assert response.status_code == 200
     data = response.json()
@@ -13,7 +9,7 @@ def test_list_parts_returns_mock_data():
     assert data["total"] >= 3
 
 
-def test_create_part():
+def test_create_part(client):
     payload = {
         "name": "Test Duct",
         "part_type": "cooling",
@@ -31,7 +27,7 @@ def test_create_part():
     assert data["part_id"].startswith("part-")
 
 
-def test_update_part_status():
+def test_update_part_status(client):
     part_id = "part-brake-jerez"
     response = client.patch(f"/parts/{part_id}/status", json={"status": "simulated"})
     assert response.status_code == 200
@@ -39,7 +35,7 @@ def test_update_part_status():
     assert data["status"] == "simulated"
 
 
-def test_part_simulate_queues_simulation():
+def test_part_simulate_queues_simulation(client):
     response = client.post("/parts/part-brake-jerez/simulate", json={"circuit_id": "jerez"})
     assert response.status_code == 200
     data = response.json()
