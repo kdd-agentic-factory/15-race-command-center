@@ -32,7 +32,12 @@ export function LiveTelemetryPage() {
   const wsRef = useRef<WebSocket | null>(null);
 
   const connect = useCallback(() => {
-    const ws = new WebSocket(`ws://${window.location.hostname}:8150/ws/telemetry`);
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsBase =
+      window.location.hostname === "localhost"
+        ? "localhost:8150"
+        : window.location.host;
+    const ws = new WebSocket(`${wsProtocol}//${wsBase}/ws/telemetry`);
     wsRef.current = ws;
     ws.onmessage = (ev) => {
       const sample: TelemetrySample = JSON.parse(ev.data);

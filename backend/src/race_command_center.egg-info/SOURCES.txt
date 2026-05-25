@@ -1,8 +1,12 @@
 pyproject.toml
 src/race_command_center/__init__.py
+src/race_command_center/auth_core.py
 src/race_command_center/config.py
 src/race_command_center/constants.py
+src/race_command_center/database.py
+src/race_command_center/insforge_auth.py
 src/race_command_center/main.py
+src/race_command_center/rate_limit.py
 src/race_command_center.egg-info/PKG-INFO
 src/race_command_center.egg-info/SOURCES.txt
 src/race_command_center.egg-info/dependency_links.txt
@@ -19,6 +23,7 @@ src/race_command_center/models/setup.py
 src/race_command_center/models/simulation.py
 src/race_command_center/models/telemetry.py
 src/race_command_center/routers/__init__.py
+src/race_command_center/routers/auth.py
 src/race_command_center/routers/circuits.py
 src/race_command_center/routers/copilot.py
 src/race_command_center/routers/decisions.py
