@@ -1,12 +1,12 @@
 import pytest
 
 
-def test_list_parts_returns_mock_data(client):
+def test_list_parts_returns_mock_data(client, seeded_part_id):
     response = client.get("/parts")
     assert response.status_code == 200
     data = response.json()
     assert "parts" in data
-    assert data["total"] >= 3
+    assert data["total"] >= 1
 
 
 def test_create_part(client):
@@ -27,16 +27,15 @@ def test_create_part(client):
     assert data["part_id"].startswith("part-")
 
 
-def test_update_part_status(client):
-    part_id = "part-brake-jerez"
-    response = client.patch(f"/parts/{part_id}/status", json={"status": "simulated"})
+def test_update_part_status(client, seeded_part_id):
+    response = client.patch(f"/parts/{seeded_part_id}/status", json={"status": "simulated"})
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "simulated"
 
 
-def test_part_simulate_queues_simulation(client):
-    response = client.post("/parts/part-brake-jerez/simulate", json={"circuit_id": "jerez"})
+def test_part_simulate_queues_simulation(client, seeded_part_id):
+    response = client.post(f"/parts/{seeded_part_id}/simulate", json={"circuit_id": "jerez"})
     assert response.status_code == 200
     data = response.json()
     assert data["simulation_requested"] is True

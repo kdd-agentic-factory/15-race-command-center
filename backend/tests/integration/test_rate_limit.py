@@ -1,12 +1,34 @@
-"""Integration tests for rate limiting middleware.
-
-The rate limit is read from RATE_LIMIT_PER_MINUTE env var (default 120).
-To exercise the limiter we patch the middleware's _limit to a low value.
-"""
+"""Integration tests for rate limiting middleware."""
+import contextlib
 import pytest
-from unittest.mock import patch
 
 from race_command_center.rate_limit import RateLimitMiddleware
+
+
+def _find_rate_limiter(app) -> RateLimitMiddleware | None:
+    """Walk the ASGI middleware stack and return the RateLimitMiddleware instance."""
+    current = app.middleware_stack
+    while current is not None:
+        if isinstance(current, RateLimitMiddleware):
+            return current
+        current = getattr(current, "app", None)
+    return None
+
+
+@contextlib.contextmanager
+def _patch_limit(app, limit: int):
+    """Temporarily set _limit on the RateLimitMiddleware, restoring afterwards."""
+    mw = _find_rate_limiter(app)
+    if mw is None:
+        yield
+        return
+    original = mw._limit
+    mw._limit = limit
+    try:
+        yield mw
+    finally:
+        mw._limit = original
+        mw._buckets.clear()  # reset counters so next test starts fresh
 
 
 def test_health_exempt_from_rate_limit(client):
@@ -22,56 +44,27 @@ def test_metrics_exempt_from_rate_limit(client):
         assert resp.status_code == 200
 
 
-def test_429_when_limit_exceeded():
+def test_429_when_limit_exceeded(client):
     """Hammer the API beyond the configured limit and expect a 429."""
-    import os
-    os.environ["RATE_LIMIT_PER_MINUTE"] = "3"
-    try:
-        from race_command_center.main import app
-        from fastapi.testclient import TestClient
+    from race_command_center.main import app
 
-        # Directly set _limit on the existing middleware instance
-        for middleware in app.middleware_stack.__dict__.get("app", app).__dict__.get("middleware", []) or []:
-            pass
+    with _patch_limit(app, limit=2) as mw:
+        responses = [client.get("/sessions") for _ in range(6)]
 
-        # Alternative: patch at class level for a small limit
-        with TestClient(app) as c:
-            # The middleware is already instantiated with RATE_LIMIT_PER_MINUTE.
-            # Directly lower the limit on the middleware instance inside the stack.
-            _find_and_patch_limit(app, limit=2)
-            responses = [c.get("/sessions") for _ in range(6)]
-
-        statuses = [r.status_code for r in responses]
-        assert 429 in statuses
-        # The 429 response must include Retry-After header
-        rate_limited = [r for r in responses if r.status_code == 429]
-        assert rate_limited[0].headers.get("Retry-After") is not None
-    finally:
-        os.environ.pop("RATE_LIMIT_PER_MINUTE", None)
+    statuses = [r.status_code for r in responses]
+    assert 429 in statuses
+    rate_limited = [r for r in responses if r.status_code == 429]
+    assert rate_limited[0].headers.get("Retry-After") is not None
 
 
-def _find_and_patch_limit(app, limit: int):
-    """Walk the ASGI middleware stack and lower _limit on RateLimitMiddleware."""
-    current = app.middleware_stack
-    while current is not None:
-        if isinstance(current, RateLimitMiddleware):
-            current._limit = limit
-            return
-        current = getattr(current, "app", None)
-
-
-def test_retry_after_header_present_on_429():
+def test_retry_after_header_present_on_429(client):
     """The 429 response must carry Retry-After so clients know when to retry."""
     from race_command_center.main import app
-    from fastapi.testclient import TestClient
 
-    with TestClient(app) as c:
-        _find_and_patch_limit(app, limit=1)
-        # First request should succeed
-        c.get("/sessions")
-        # Second should be rate limited
+    with _patch_limit(app, limit=1):
+        client.get("/sessions")  # first request passes
         for _ in range(10):
-            resp = c.get("/sessions")
+            resp = client.get("/sessions")
             if resp.status_code == 429:
                 assert "Retry-After" in resp.headers
                 return

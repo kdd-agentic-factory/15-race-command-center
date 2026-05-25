@@ -19,6 +19,4 @@ def test_setup_diff_same_setup(client):
 
 def test_setup_diff_unknown_setup(client):
     response = client.get("/setup/diff/nonexistent/setup-base-jerez")
-    assert response.status_code == 200
-    data = response.json()
-    assert "note" in data
+    assert response.status_code == 404

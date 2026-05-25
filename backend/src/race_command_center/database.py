@@ -72,13 +72,32 @@ CREATE TABLE IF NOT EXISTS decisions (
 );
 
 CREATE TABLE IF NOT EXISTS setups (
-    setup_id     TEXT PRIMARY KEY,
-    session_id   TEXT,
-    circuit_id   TEXT NOT NULL,
-    label        TEXT NOT NULL,
-    components   TEXT NOT NULL DEFAULT '{}',
-    created_at   TEXT,
-    updated_at   TEXT
+    setup_id                TEXT PRIMARY KEY,
+    session_id              TEXT,
+    name                    TEXT NOT NULL DEFAULT '',
+    front_preload           REAL,
+    rear_preload            REAL,
+    front_compression       REAL,
+    rear_compression        REAL,
+    front_rebound           REAL,
+    rear_rebound            REAL,
+    front_ride_height       REAL,
+    rear_ride_height        REAL,
+    wheelbase               REAL,
+    swingarm_length         REAL,
+    engine_map              TEXT,
+    traction_control_map    TEXT,
+    anti_wheelie_map        TEXT,
+    engine_brake_map        TEXT,
+    front_tire_pressure     REAL,
+    rear_tire_pressure      REAL,
+    front_compound          TEXT,
+    rear_compound           TEXT,
+    aero_package            TEXT,
+    custom_parts            TEXT NOT NULL DEFAULT '[]',
+    status                  TEXT NOT NULL DEFAULT 'draft',
+    created_at              TEXT,
+    updated_at              TEXT
 );
 
 CREATE TABLE IF NOT EXISTS parts (
