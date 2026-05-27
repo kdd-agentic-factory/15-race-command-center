@@ -125,19 +125,20 @@ async def metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
-app.include_router(auth.router)
-app.include_router(health.router, tags=["health"])
-app.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
-app.include_router(telemetry.router, prefix="/telemetry", tags=["telemetry"])
-app.include_router(circuits.router, prefix="/circuits", tags=["circuits"])
-app.include_router(setup.router, prefix="/setup", tags=["setup"])
-app.include_router(parts.router, prefix="/parts", tags=["parts"])
-app.include_router(pregp.router, prefix="/pre-gp", tags=["pre-grand-prix"])
-app.include_router(decisions.router, prefix="/decisions", tags=["decisions"])
-app.include_router(copilot.router, prefix="/copilot", tags=["copilot"])
-app.include_router(simulation.router, prefix="/simulation", tags=["simulation"])
-app.include_router(reports.router, prefix="/reports", tags=["reports"])
-app.include_router(websocket.router, tags=["websocket"])
+_API_V1 = "/api/v1"
+app.include_router(auth.router)                  # /auth/* — not versioned (login/token)
+app.include_router(health.router, tags=["health"])  # /health — not versioned (infra probe)
+app.include_router(sessions.router, prefix=f"{_API_V1}/sessions", tags=["sessions"])
+app.include_router(telemetry.router, prefix=f"{_API_V1}/telemetry", tags=["telemetry"])
+app.include_router(circuits.router, prefix=f"{_API_V1}/circuits", tags=["circuits"])
+app.include_router(setup.router, prefix=f"{_API_V1}/setup", tags=["setup"])
+app.include_router(parts.router, prefix=f"{_API_V1}/parts", tags=["parts"])
+app.include_router(pregp.router, prefix=f"{_API_V1}/pre-gp", tags=["pre-grand-prix"])
+app.include_router(decisions.router, prefix=f"{_API_V1}/decisions", tags=["decisions"])
+app.include_router(copilot.router, prefix=f"{_API_V1}/copilot", tags=["copilot"])
+app.include_router(simulation.router, prefix=f"{_API_V1}/simulation", tags=["simulation"])
+app.include_router(reports.router, prefix=f"{_API_V1}/reports", tags=["reports"])
+app.include_router(websocket.router, tags=["websocket"])  # /ws — not versioned (long-lived)
 
 _configure_otel(app)
 

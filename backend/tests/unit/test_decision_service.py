@@ -2,7 +2,7 @@ import pytest
 
 
 def test_list_decisions_returns_mock_data(client):
-    response = client.get("/decisions")
+    response = client.get("/api/v1/decisions")
     assert response.status_code == 200
     data = response.json()
     assert "decisions" in data
@@ -10,7 +10,7 @@ def test_list_decisions_returns_mock_data(client):
 
 
 def test_approve_decision(client):
-    response = client.post("/decisions/dec-map2/approve", json={"approved_by": "crew_chief"})
+    response = client.post("/api/v1/decisions/dec-map2/approve", json={"approved_by": "crew_chief"})
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "approved"
@@ -18,7 +18,7 @@ def test_approve_decision(client):
 
 
 def test_reject_decision(client):
-    response = client.post("/decisions/dec-rebound/reject", json={"reason": "Risk too high for current session"})
+    response = client.post("/api/v1/decisions/dec-rebound/reject", json={"reason": "Risk too high for current session"})
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "rejected"
@@ -26,7 +26,7 @@ def test_reject_decision(client):
 
 
 def test_request_simulation(client):
-    response = client.post("/decisions/dec-map2/request-simulation")
+    response = client.post("/api/v1/decisions/dec-map2/request-simulation")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "simulation_required"

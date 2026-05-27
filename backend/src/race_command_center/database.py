@@ -133,12 +133,16 @@ CREATE INDEX IF NOT EXISTS idx_telem_session ON telemetry_samples (session_id);
 
 
 async def init_db() -> None:
-    async with engine.begin() as conn:
-        for stmt in _DDL.strip().split(";"):
-            stmt = stmt.strip()
-            if stmt:
-                await conn.execute(text(stmt))
-    logger.info("Database schema initialised (%s)", "sqlite" if _is_sqlite else "postgres")
+    if _is_sqlite:
+        async with engine.begin() as conn:
+            for stmt in _DDL.strip().split(";"):
+                stmt = stmt.strip()
+                if stmt:
+                    await conn.execute(text(stmt))
+        logger.info("Database schema initialised (sqlite)")
+    else:
+        # PostgreSQL: schema already applied via 03-service-migrations.sql
+        logger.info("Database schema skipped — using PostgreSQL (migrations pre-applied)")
 
 
 async def get_session() -> AsyncSession:  # type: ignore[misc]

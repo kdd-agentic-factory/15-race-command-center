@@ -2,7 +2,7 @@ import pytest
 
 
 def test_list_parts_returns_mock_data(client, seeded_part_id):
-    response = client.get("/parts")
+    response = client.get("/api/v1/parts")
     assert response.status_code == 200
     data = response.json()
     assert "parts" in data
@@ -19,7 +19,7 @@ def test_create_part(client):
         "expected_impact": "Test impact",
         "risk_level": "low",
     }
-    response = client.post("/parts", json=payload)
+    response = client.post("/api/v1/parts", json=payload)
     assert response.status_code == 201
     data = response.json()
     assert data["name"] == "Test Duct"
@@ -28,14 +28,14 @@ def test_create_part(client):
 
 
 def test_update_part_status(client, seeded_part_id):
-    response = client.patch(f"/parts/{seeded_part_id}/status", json={"status": "simulated"})
+    response = client.patch(f"/api/v1/parts/{seeded_part_id}/status", json={"status": "simulated"})
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "simulated"
 
 
 def test_part_simulate_queues_simulation(client, seeded_part_id):
-    response = client.post(f"/parts/{seeded_part_id}/simulate", json={"circuit_id": "jerez"})
+    response = client.post(f"/api/v1/parts/{seeded_part_id}/simulate", json={"circuit_id": "jerez"})
     assert response.status_code == 200
     data = response.json()
     assert data["simulation_requested"] is True

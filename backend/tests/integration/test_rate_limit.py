@@ -49,7 +49,7 @@ def test_429_when_limit_exceeded(client):
     from race_command_center.main import app
 
     with _patch_limit(app, limit=2) as mw:
-        responses = [client.get("/sessions") for _ in range(6)]
+        responses = [client.get("/api/v1/sessions") for _ in range(6)]
 
     statuses = [r.status_code for r in responses]
     assert 429 in statuses
@@ -62,9 +62,9 @@ def test_retry_after_header_present_on_429(client):
     from race_command_center.main import app
 
     with _patch_limit(app, limit=1):
-        client.get("/sessions")  # first request passes
+        client.get("/api/v1/sessions")  # first request passes
         for _ in range(10):
-            resp = client.get("/sessions")
+            resp = client.get("/api/v1/sessions")
             if resp.status_code == 429:
                 assert "Retry-After" in resp.headers
                 return

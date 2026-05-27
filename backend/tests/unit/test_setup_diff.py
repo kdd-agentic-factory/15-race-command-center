@@ -2,7 +2,7 @@ import pytest
 
 
 def test_setup_diff_detects_changes(client):
-    response = client.get("/setup/diff/setup-base-jerez/setup-q-jerez")
+    response = client.get("/api/v1/setup/diff/setup-base-jerez/setup-q-jerez")
     assert response.status_code == 200
     data = response.json()
     assert "changes" in data
@@ -10,7 +10,7 @@ def test_setup_diff_detects_changes(client):
 
 
 def test_setup_diff_same_setup(client):
-    response = client.get("/setup/diff/setup-base-jerez/setup-base-jerez")
+    response = client.get("/api/v1/setup/diff/setup-base-jerez/setup-base-jerez")
     assert response.status_code == 200
     data = response.json()
     assert data["changes"] == []
@@ -18,5 +18,5 @@ def test_setup_diff_same_setup(client):
 
 
 def test_setup_diff_unknown_setup(client):
-    response = client.get("/setup/diff/nonexistent/setup-base-jerez")
+    response = client.get("/api/v1/setup/diff/nonexistent/setup-base-jerez")
     assert response.status_code == 404

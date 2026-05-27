@@ -21,7 +21,7 @@ def client():
 def _seed(c: TestClient) -> None:
     """Seed the unit test DB with the data the unit tests expect."""
     # Decisions with explicit IDs (the decisions model accepts decision_id in POST body)
-    c.post("/decisions", json={
+    c.post("/api/v1/decisions", json={
         "decision_id": "dec-map2",
         "title": "Cambiar mapa motor a MAP2",
         "decision_type": "engine_map",
@@ -30,7 +30,7 @@ def _seed(c: TestClient) -> None:
         "status": "proposed",
         "session_id": "ses-unit-test",
     })
-    c.post("/decisions", json={
+    c.post("/api/v1/decisions", json={
         "decision_id": "dec-rebound",
         "title": "Ajuste de rebound trasero",
         "decision_type": "suspension",
@@ -41,7 +41,7 @@ def _seed(c: TestClient) -> None:
     })
 
     # Setups with explicit IDs
-    c.post("/setup", json={
+    c.post("/api/v1/setup", json={
         "setup_id": "setup-base-jerez",
         "name": "Base Jerez FP1",
         "front_preload": 10.0,
@@ -55,7 +55,7 @@ def _seed(c: TestClient) -> None:
         "rear_compound": "medium",
         "status": "active",
     })
-    c.post("/setup", json={
+    c.post("/api/v1/setup", json={
         "setup_id": "setup-q-jerez",
         "name": "Qualifying Jerez",
         "front_preload": 10.0,
@@ -74,7 +74,7 @@ def _seed(c: TestClient) -> None:
 @pytest.fixture(scope="module")
 def seeded_part_id(client) -> str:
     """Create a part and return its generated ID for tests that update by ID."""
-    resp = client.post("/parts", json={
+    resp = client.post("/api/v1/parts", json={
         "name": "Brake Disc Jerez Spec",
         "part_type": "braking",
         "target_circuit_id": "jerez",

@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+"""Circuits router — serves static circuit profiles from the in-memory catalogue."""
+from fastapi import APIRouter, HTTPException
 from race_command_center.models.circuit import CircuitProfile, CornerProfile
 
 router = APIRouter()
@@ -39,6 +40,22 @@ _CIRCUITS: dict[str, CircuitProfile] = {
         braking_demand="medium",
         traction_demand="high",
         surface_abrasion="medium",
+        corners=[
+            CornerProfile(
+                corner_id="T1", name="San Donato", corner_type="heavy_braking",
+                entry_speed=290, min_speed=70, max_lean_angle=55, risk_level="high",
+                recommendations=["Heavy braking zone — monitor front temp"],
+            ),
+            CornerProfile(
+                corner_id="T9", name="Arrabbiata 1", corner_type="fast_sweep",
+                entry_speed=220, min_speed=145, max_lean_angle=63, risk_level="medium",
+            ),
+            CornerProfile(
+                corner_id="T15", name="Bucine", corner_type="long_sweep",
+                entry_speed=185, min_speed=95, avg_spin_ratio=0.065, risk_level="medium",
+                recommendations=["Long traction zone — rear tire load"],
+            ),
+        ],
     ),
     "assen": CircuitProfile(
         circuit_id="assen",
@@ -49,6 +66,21 @@ _CIRCUITS: dict[str, CircuitProfile] = {
         braking_demand="medium",
         traction_demand="medium",
         surface_abrasion="low",
+        corners=[
+            CornerProfile(
+                corner_id="T1", name="Gasunie", corner_type="slow_hairpin",
+                entry_speed=200, min_speed=50, max_lean_angle=60, risk_level="medium",
+            ),
+            CornerProfile(
+                corner_id="T9", name="Ramshoek", corner_type="fast_sweep",
+                entry_speed=240, min_speed=170, max_lean_angle=65, risk_level="medium",
+                recommendations=["Highest speed corner — chassis rigidity critical"],
+            ),
+            CornerProfile(
+                corner_id="T18", name="Geert Timmer", corner_type="technical",
+                entry_speed=155, min_speed=65, max_lean_angle=58, risk_level="low",
+            ),
+        ],
     ),
 }
 
@@ -62,7 +94,10 @@ async def list_circuits():
 async def get_circuit(circuit_id: str):
     circuit = _CIRCUITS.get(circuit_id)
     if not circuit:
-        return {"circuit_id": circuit_id, "status": "not_found", "mode": "mock"}
+        raise HTTPException(
+            status_code=404,
+            detail=f"Circuit '{circuit_id}' not found. Available: {sorted(_CIRCUITS)}",
+        )
     return circuit
 
 
@@ -70,5 +105,8 @@ async def get_circuit(circuit_id: str):
 async def get_corners(circuit_id: str):
     circuit = _CIRCUITS.get(circuit_id)
     if not circuit:
-        return {"corners": [], "mode": "mock"}
+        raise HTTPException(
+            status_code=404,
+            detail=f"Circuit '{circuit_id}' not found. Available: {sorted(_CIRCUITS)}",
+        )
     return {"circuit_id": circuit_id, "corners": circuit.corners}

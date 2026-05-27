@@ -13,7 +13,7 @@ _SESSION_PAYLOAD = {
 
 
 def test_list_sessions_initially_empty_or_list(client):
-    resp = client.get("/sessions")
+    resp = client.get("/api/v1/sessions")
     assert resp.status_code == 200
     data = resp.json()
     assert "sessions" in data
@@ -22,7 +22,7 @@ def test_list_sessions_initially_empty_or_list(client):
 
 
 def test_create_session(client):
-    resp = client.post("/sessions", json=_SESSION_PAYLOAD)
+    resp = client.post("/api/v1/sessions", json=_SESSION_PAYLOAD)
     assert resp.status_code == 201
     data = resp.json()
     assert data["circuit_id"] == "mugello"
@@ -33,10 +33,10 @@ def test_create_session(client):
 
 
 def test_get_session_by_id(client):
-    created = client.post("/sessions", json=_SESSION_PAYLOAD).json()
+    created = client.post("/api/v1/sessions", json=_SESSION_PAYLOAD).json()
     session_id = created["session_id"]
 
-    resp = client.get(f"/sessions/{session_id}")
+    resp = client.get(f"/api/v1/sessions/{session_id}")
     assert resp.status_code == 200
     data = resp.json()
     assert data["session_id"] == session_id
@@ -44,15 +44,15 @@ def test_get_session_by_id(client):
 
 
 def test_get_session_not_found(client):
-    resp = client.get("/sessions/does-not-exist")
+    resp = client.get("/api/v1/sessions/does-not-exist")
     assert resp.status_code == 404
 
 
 def test_close_session(client):
-    created = client.post("/sessions", json=_SESSION_PAYLOAD).json()
+    created = client.post("/api/v1/sessions", json=_SESSION_PAYLOAD).json()
     session_id = created["session_id"]
 
-    resp = client.post(f"/sessions/{session_id}/close")
+    resp = client.post(f"/api/v1/sessions/{session_id}/close")
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "closed"
@@ -60,15 +60,15 @@ def test_close_session(client):
 
 
 def test_close_nonexistent_session(client):
-    resp = client.post("/sessions/ghost-session/close")
+    resp = client.post("/api/v1/sessions/ghost-session/close")
     assert resp.status_code == 404
 
 
 def test_list_sessions_includes_created(client):
-    created = client.post("/sessions", json=_SESSION_PAYLOAD).json()
+    created = client.post("/api/v1/sessions", json=_SESSION_PAYLOAD).json()
     session_id = created["session_id"]
 
-    resp = client.get("/sessions")
+    resp = client.get("/api/v1/sessions")
     assert resp.status_code == 200
     ids = [s["session_id"] for s in resp.json()["sessions"]]
     assert session_id in ids
