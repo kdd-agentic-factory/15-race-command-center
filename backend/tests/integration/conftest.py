@@ -6,6 +6,8 @@ import pathlib
 _TEST_DB = pathlib.Path(__file__).parent / "test_rcc.db"
 os.environ.setdefault("DATABASE_URL", f"sqlite+aiosqlite:///{_TEST_DB}")
 os.environ.setdefault("RATE_LIMIT_PER_MINUTE", "99999")
+# Mock telemetry endpoints are only registered when mock mode is on (off in prod).
+os.environ.setdefault("ENABLE_MOCK_MODE", "true")
 
 import pytest
 from fastapi.testclient import TestClient

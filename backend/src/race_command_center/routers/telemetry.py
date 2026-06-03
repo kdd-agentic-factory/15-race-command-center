@@ -6,6 +6,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, HTTPException, Query
 
+from race_command_center.config import settings
 from race_command_center.database import load_telemetry_by_session, save_telemetry_samples
 from race_command_center.models.telemetry import TelemetrySample, TelemetryWindow
 
@@ -13,7 +14,8 @@ router = APIRouter()
 
 
 # ---------------------------------------------------------------------------
-# Dev / mock endpoints (kept for local testing without live data sources)
+# Dev / mock endpoints — only registered when ENABLE_MOCK_MODE is set (off in
+# production), so synthetic-data routes are never exposed on a live deployment.
 # ---------------------------------------------------------------------------
 
 def _mock_sample(session_id: str | None = None) -> TelemetrySample:
@@ -42,14 +44,17 @@ def _mock_sample(session_id: str | None = None) -> TelemetrySample:
     )
 
 
-@router.get("/mock")
 async def mock_telemetry(session_id: str | None = None) -> TelemetrySample:
     return _mock_sample(session_id)
 
 
-@router.get("/mock/batch")
 async def mock_telemetry_batch(session_id: str | None = None, count: int = 10) -> dict:
     return {"samples": [_mock_sample(session_id) for _ in range(min(count, 100))]}
+
+
+if settings.enable_mock_mode:
+    router.add_api_route("/mock", mock_telemetry, methods=["GET"])
+    router.add_api_route("/mock/batch", mock_telemetry_batch, methods=["GET"])
 
 
 # ---------------------------------------------------------------------------

@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     orchestrator_url: str = "http://localhost:8000"
     observability_url: str = "http://localhost:9090"
 
-    enable_mock_mode: bool = True
+    enable_mock_mode: bool = False
     enable_live_telemetry: bool = True
     enable_copilot: bool = True
     enable_digital_twin: bool = True
