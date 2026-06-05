@@ -38,6 +38,32 @@ AsyncSessionLocal = async_sessionmaker(
     expire_on_commit=False,
 )
 
+if not _is_sqlite:
+    # Schema drift: the shared InsForge schema declares the timestamp columns as
+    # TIMESTAMP, but this service models every timestamp as an ISO string (its own
+    # DDL above uses TEXT, and the SQLite dev path stores strings). asyncpg then
+    # rejects a str bound to a TIMESTAMP column ("expected a datetime.datetime
+    # instance, got 'str'"), so every write 500s in production while reads (no
+    # bind) succeed. Register text passthrough codecs so ISO strings round-trip
+    # on both write and read — no datetime juggling across the routers.
+    from datetime import datetime as _dt
+
+    from sqlalchemy import event
+
+    @event.listens_for(engine.sync_engine, "connect")
+    def _register_text_timestamp_codecs(dbapi_connection, connection_record):
+        async def _setup(conn):
+            for _typename in ("timestamp", "timestamptz", "date"):
+                await conn.set_type_codec(
+                    _typename,
+                    schema="pg_catalog",
+                    encoder=lambda v: v if isinstance(v, str) else _dt.isoformat(v),
+                    decoder=lambda v: v,
+                    format="text",
+                )
+
+        dbapi_connection.run_async(_setup)
+
 _DDL = """
 CREATE TABLE IF NOT EXISTS race_sessions (
     session_id   TEXT PRIMARY KEY,
