@@ -38,6 +38,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
       "sqlalchemy[asyncio]>=2.0" \
       "asyncpg>=0.29" \
       "aiosqlite>=0.20" \
+      "openpyxl>=3.1" \
+      "python-multipart>=0.0.9" \
       PyJWT \
       bcrypt
 

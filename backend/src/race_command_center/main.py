@@ -38,6 +38,7 @@ from race_command_center.routers import (
     circuits,
     copilot,
     decisions,
+    engine_brake,
     health,
     parts,
     pregp,
@@ -132,6 +133,7 @@ app.include_router(sessions.router, prefix=f"{_API_V1}/sessions", tags=["session
 app.include_router(telemetry.router, prefix=f"{_API_V1}/telemetry", tags=["telemetry"])
 app.include_router(circuits.router, prefix=f"{_API_V1}/circuits", tags=["circuits"])
 app.include_router(setup.router, prefix=f"{_API_V1}/setup", tags=["setup"])
+app.include_router(engine_brake.router, prefix=f"{_API_V1}/engine-brake", tags=["engine-brake"])
 app.include_router(parts.router, prefix=f"{_API_V1}/parts", tags=["parts"])
 app.include_router(pregp.router, prefix=f"{_API_V1}/pre-gp", tags=["pre-grand-prix"])
 app.include_router(decisions.router, prefix=f"{_API_V1}/decisions", tags=["decisions"])
