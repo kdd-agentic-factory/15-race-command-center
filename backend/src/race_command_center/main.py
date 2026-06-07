@@ -50,6 +50,7 @@ from race_command_center.routers import (
     setup_sheet,
     simulation,
     telemetry,
+    weekend_schedule,
     websocket,
 )
 
@@ -142,6 +143,7 @@ app.include_router(setup_impact.router, prefix=f"{_API_V1}/setup-impact", tags=[
 app.include_router(rider_voice.router, prefix=f"{_API_V1}/rider-voice", tags=["rider-voice"])
 app.include_router(parts.router, prefix=f"{_API_V1}/parts", tags=["parts"])
 app.include_router(pregp.router, prefix=f"{_API_V1}/pre-gp", tags=["pre-grand-prix"])
+app.include_router(weekend_schedule.router, prefix=f"{_API_V1}/weekend-schedule", tags=["weekend-schedule"])
 app.include_router(decisions.router, prefix=f"{_API_V1}/decisions", tags=["decisions"])
 app.include_router(copilot.router, prefix=f"{_API_V1}/copilot", tags=["copilot"])
 app.include_router(simulation.router, prefix=f"{_API_V1}/simulation", tags=["simulation"])
