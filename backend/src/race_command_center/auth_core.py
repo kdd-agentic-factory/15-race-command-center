@@ -27,8 +27,10 @@ _AUTH_URL_RAW: str = os.getenv(
 AUTH_DATABASE_URL: str = _AUTH_URL_RAW.replace("postgresql+asyncpg://", "postgresql://")
 
 if not JWT_SECRET:
-    logger.warning("JWT_SECRET not set — using insecure default (set it in production!)")
-_signing_key = JWT_SECRET or "kdd-dev-secret-change-me"
+    logger.critical("JWT_SECRET environment variable is REQUIRED — aborting startup")
+    raise RuntimeError("JWT_SECRET is not configured. Set JWT_SECRET environment variable before starting.")
+
+_signing_key = JWT_SECRET
 
 
 # ── Token helpers ──────────────────────────────────────────────────────────────
