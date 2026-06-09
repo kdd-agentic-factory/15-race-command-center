@@ -10,11 +10,12 @@ def test_list_decisions_returns_mock_data(client):
 
 
 def test_approve_decision(client):
-    response = client.post("/api/v1/decisions/dec-map2/approve", json={"approved_by": "crew_chief"})
+    # approved_by is now derived from the authenticated principal, not the body
+    response = client.post("/api/v1/decisions/dec-map2/approve", json={"notes": "Approved after simulation"})
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "approved"
-    assert data["approved_by"] == "crew_chief"
+    assert data["approved_by"] == "Test Runner"  # from the mock principal override
 
 
 def test_reject_decision(client):

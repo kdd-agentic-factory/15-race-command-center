@@ -24,10 +24,8 @@ class CrewChiefDecision(BaseModel):
 
 
 class DecisionApprove(BaseModel):
-    approved_by: str = "crew_chief"
     notes: str | None = None
 
 
 class DecisionReject(BaseModel):
     reason: str
-    rejected_by: str = "crew_chief"

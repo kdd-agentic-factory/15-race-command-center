@@ -15,7 +15,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger(__name__)
 
-_AUTH_ENABLED = os.getenv("INSFORGE_AUTH_ENABLED", "false").lower() == "true"
+_AUTH_ENABLED = os.getenv("INSFORGE_AUTH_ENABLED", "true").lower() == "true"
 _BYPASS = {
     "/health", "/healthz", "/readyz",
     "/metrics", "/prometheus",

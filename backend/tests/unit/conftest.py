@@ -4,11 +4,20 @@ import os
 # Must be set before race_command_center is first imported.
 os.environ.setdefault("RATE_LIMIT_PER_MINUTE", "99999")
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test_unit.db")
+os.environ.setdefault("INSFORGE_AUTH_ENABLED", "false")  # middleware disabled in tests
 
 import pytest
 from fastapi.testclient import TestClient
 
+from race_command_center.auth_deps import Principal, get_current_principal
 from race_command_center.main import app
+
+
+# Override auth so unit tests don't need Bearer tokens.
+async def _mock_principal() -> Principal:
+    return Principal(id="test_runner", role="admin", display_name="Test Runner")
+
+app.dependency_overrides[get_current_principal] = _mock_principal
 
 
 @pytest.fixture(scope="module")
