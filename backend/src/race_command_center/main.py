@@ -112,7 +112,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(InsForgeAuthMiddleware)
-app.add_middleware(RateLimitMiddleware, calls_per_minute=int(os.getenv("RATE_LIMIT_PER_MINUTE", "120")))
+app.add_middleware(RateLimitMiddleware, calls_per_minute=int(os.getenv("RATE_LIMIT_PER_MINUTE", "60")))
 
 
 @app.middleware("http")
