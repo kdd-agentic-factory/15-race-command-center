@@ -4,7 +4,7 @@ import pathlib
 from contextlib import asynccontextmanager
 
 import structlog
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, JSONResponse, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
@@ -128,6 +128,37 @@ async def metrics_middleware(request: Request, call_next):
 @app.get("/metrics", include_in_schema=False)
 async def metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
+_logger = logging.getLogger("race-command-center")
+
+
+@app.exception_handler(422)
+async def _validation_handler(request, exc):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": "validation_error",
+            "detail": str(exc.errors()) if hasattr(exc, "errors") else str(exc),
+        },
+    )
+
+
+@app.exception_handler(404)
+async def _not_found_handler(request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={"error": "not_found", "detail": "The requested resource was not found."},
+    )
+
+
+@app.exception_handler(Exception)
+async def _generic_handler(request, exc):
+    _logger.exception("unhandled_exception", exc_info=exc)
+    return JSONResponse(
+        status_code=500,
+        content={"error": "internal_error", "detail": "An internal error occurred."},
+    )
 
 
 _API_V1 = "/api/v1"
