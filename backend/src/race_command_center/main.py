@@ -4,14 +4,15 @@ import pathlib
 from contextlib import asynccontextmanager
 
 import structlog
-from fastapi import FastAPI, JSONResponse, Request, Response
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from race_command_center.database import init_db
-from race_command_center.insforge_auth import InsForgeAuthMiddleware
-from race_command_center.rate_limit import RateLimitMiddleware
+from race_command_center.insforge_auth import setup_auth_middleware
+from race_command_center.rate_limit import setup_rate_limit_middleware
 
 
 def _configure_otel(app: FastAPI, service_name: str = "race-command-center") -> None:
@@ -111,9 +112,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(InsForgeAuthMiddleware)
-app.add_middleware(RateLimitMiddleware, calls_per_minute=int(os.getenv("RATE_LIMIT_PER_MINUTE", "60")))
 
+# ── Middleware stack (outermost → innermost) ──────────────────────────
+# @app.middleware("http") uses insert(0), so last registered = outermost.
+# Register innermost first: auth, then rate_limit, then metrics (outermost).
+setup_auth_middleware(app)
+setup_rate_limit_middleware(app, calls_per_minute=int(os.getenv("RATE_LIMIT_PER_MINUTE", "60")))
 
 @app.middleware("http")
 async def metrics_middleware(request: Request, call_next):
@@ -141,14 +145,6 @@ async def _validation_handler(request, exc):
             "error": "validation_error",
             "detail": str(exc.errors()) if hasattr(exc, "errors") else str(exc),
         },
-    )
-
-
-@app.exception_handler(404)
-async def _not_found_handler(request, exc):
-    return JSONResponse(
-        status_code=404,
-        content={"error": "not_found", "detail": "The requested resource was not found."},
     )
 
 
@@ -183,6 +179,15 @@ app.include_router(websocket.router, tags=["websocket"])  # /ws — not versione
 
 _configure_otel(app)
 
-static_dir = pathlib.Path(__file__).parent.parent.parent.parent / "static"
-if static_dir.exists():
+static_dir = pathlib.Path(__file__).parent.parent.parent / "static"
+_index = static_dir / "index.html" if static_dir.exists() else None
+if _index and _index.exists():
     app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
+
+
+@app.exception_handler(404)
+async def _spa_fallback(request, exc):
+    """Serve index.html for SPA client-side routes; return JSON for API paths."""
+    if _index and _index.exists() and not request.url.path.startswith("/api/"):
+        return FileResponse(str(_index))
+    return JSONResponse(status_code=404, content={"error": "not_found", "detail": "Not found"})
