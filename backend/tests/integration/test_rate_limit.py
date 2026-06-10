@@ -1,71 +1,62 @@
-"""Integration tests for rate limiting middleware."""
-import contextlib
-import pytest
+"""Integration tests for the rate limiting middleware.
 
-from race_command_center.rate_limit import RateLimitMiddleware
+The middleware is closure-based (setup_rate_limit_middleware registers an
+@app.middleware('http') handler), so each test builds a small standalone
+FastAPI app with a low limit instead of patching internals on the main app.
+"""
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
-
-def _find_rate_limiter(app) -> RateLimitMiddleware | None:
-    """Walk the ASGI middleware stack and return the RateLimitMiddleware instance."""
-    current = app.middleware_stack
-    while current is not None:
-        if isinstance(current, RateLimitMiddleware):
-            return current
-        current = getattr(current, "app", None)
-    return None
+from race_command_center.rate_limit import setup_rate_limit_middleware
 
 
-@contextlib.contextmanager
-def _patch_limit(app, limit: int):
-    """Temporarily set _limit on the RateLimitMiddleware, restoring afterwards."""
-    mw = _find_rate_limiter(app)
-    if mw is None:
-        yield
-        return
-    original = mw._limit
-    mw._limit = limit
-    try:
-        yield mw
-    finally:
-        mw._limit = original
-        mw._buckets.clear()  # reset counters so next test starts fresh
+def _build_app(calls_per_minute: int) -> TestClient:
+    app = FastAPI()
+    setup_rate_limit_middleware(app, calls_per_minute=calls_per_minute)
+
+    @app.get("/health")
+    async def health():
+        return {"status": "ok"}
+
+    @app.get("/metrics")
+    async def metrics():
+        return {"metrics": "ok"}
+
+    @app.get("/api/v1/sessions")
+    async def sessions():
+        return {"sessions": []}
+
+    return TestClient(app)
 
 
-def test_health_exempt_from_rate_limit(client):
+def test_health_exempt_from_rate_limit():
     """Health endpoint is always allowed regardless of rate limit state."""
-    for _ in range(5):
-        resp = client.get("/health")
-        assert resp.status_code == 200
+    client = _build_app(calls_per_minute=2)
+    for _ in range(10):
+        assert client.get("/health").status_code == 200
 
 
-def test_metrics_exempt_from_rate_limit(client):
-    for _ in range(5):
-        resp = client.get("/metrics")
-        assert resp.status_code == 200
+def test_metrics_exempt_from_rate_limit():
+    client = _build_app(calls_per_minute=2)
+    for _ in range(10):
+        assert client.get("/metrics").status_code == 200
 
 
-def test_429_when_limit_exceeded(client):
+def test_429_when_limit_exceeded():
     """Hammer the API beyond the configured limit and expect a 429."""
-    from race_command_center.main import app
-
-    with _patch_limit(app, limit=2) as mw:
-        responses = [client.get("/api/v1/sessions") for _ in range(6)]
+    client = _build_app(calls_per_minute=2)
+    responses = [client.get("/api/v1/sessions") for _ in range(6)]
 
     statuses = [r.status_code for r in responses]
+    assert statuses[:2] == [200, 200]
     assert 429 in statuses
-    rate_limited = [r for r in responses if r.status_code == 429]
-    assert rate_limited[0].headers.get("Retry-After") is not None
 
 
-def test_retry_after_header_present_on_429(client):
+def test_retry_after_header_present_on_429():
     """The 429 response must carry Retry-After so clients know when to retry."""
-    from race_command_center.main import app
-
-    with _patch_limit(app, limit=1):
-        client.get("/api/v1/sessions")  # first request passes
-        for _ in range(10):
-            resp = client.get("/api/v1/sessions")
-            if resp.status_code == 429:
-                assert "Retry-After" in resp.headers
-                return
-    pytest.skip("Could not trigger rate limit in this test run")
+    client = _build_app(calls_per_minute=1)
+    assert client.get("/api/v1/sessions").status_code == 200
+    resp = client.get("/api/v1/sessions")
+    assert resp.status_code == 429
+    assert "Retry-After" in resp.headers
+    assert int(resp.headers["Retry-After"]) >= 1
