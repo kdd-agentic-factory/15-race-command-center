@@ -50,3 +50,5 @@ Thumbs.db
 
 # InsForge deploy temp env file
 .env.insforge-compute
+
+node_modules/
