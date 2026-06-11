@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
@@ -30,31 +30,39 @@ export function LiveTelemetryPage() {
   const [history, setHistory] = useState<TelemetrySample[]>([]);
   const [latest, setLatest] = useState<TelemetrySample | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
-
-  const connect = useCallback(() => {
-    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsBase =
-      window.location.hostname === "localhost"
-        ? "localhost:8150"
-        : window.location.host;
-    const ws = new WebSocket(`${wsProtocol}//${wsBase}/ws/telemetry`);
-    wsRef.current = ws;
-    ws.onmessage = (ev) => {
-      const sample: TelemetrySample = JSON.parse(ev.data);
-      setLatest(sample);
-      setHistory((h) => {
-        const next = [...h, { ...sample, ts: Date.now() }];
-        return next.length > MAX_HISTORY ? next.slice(-MAX_HISTORY) : next;
-      });
-    };
-    ws.onclose = () => setTimeout(connect, 2000);
-    return ws;
-  }, []);
+  const reconnectTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const ws = connect();
-    return () => ws.close();
-  }, [connect]);
+    const connect = () => {
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsBase =
+        window.location.hostname === "localhost"
+          ? "localhost:8150"
+          : window.location.host;
+      const ws = new WebSocket(`${wsProtocol}//${wsBase}/ws/telemetry`);
+      wsRef.current = ws;
+      ws.onmessage = (ev) => {
+        const sample: TelemetrySample = JSON.parse(ev.data);
+        setLatest(sample);
+        setHistory((h) => {
+          const next = [...h, { ...sample, ts: Date.now() }];
+          return next.length > MAX_HISTORY ? next.slice(-MAX_HISTORY) : next;
+        });
+      };
+      ws.onclose = () => {
+        reconnectTimeoutRef.current = window.setTimeout(connect, 2000);
+      };
+    };
+
+    connect();
+
+    return () => {
+      if (reconnectTimeoutRef.current !== null) {
+        window.clearTimeout(reconnectTimeoutRef.current);
+      }
+      wsRef.current?.close();
+    };
+  }, []);
 
   const chartData = history.map((s, i) => ({
     i,
