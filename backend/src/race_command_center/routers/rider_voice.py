@@ -12,10 +12,17 @@ from collections import deque
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
+from race_command_center.database import get_session
 from race_command_center.services import rider_debrief
+from race_command_center.services.governance_reporting import (
+    count_feedback_entries,
+    list_feedback_entries,
+    persist_feedback_entry,
+)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -31,7 +38,7 @@ class DebriefRequest(BaseModel):
 
 
 @router.post("/debrief")
-async def post_debrief(payload: DebriefRequest) -> dict:
+async def post_debrief(payload: DebriefRequest, db: AsyncSession = Depends(get_session)) -> dict:
     if not payload.transcript.strip():
         raise HTTPException(status_code=400, detail="Empty transcript")
     result = rider_debrief.debrief(payload.transcript)
@@ -43,11 +50,13 @@ async def post_debrief(payload: DebriefRequest) -> dict:
         **result,
     }
     _DEBRIEFS.append(record)
+    await persist_feedback_entry(record, db=db)
+    await db.commit()
     logger.info("Rider debrief stored: %s", result["summary"])
     return record
 
 
 @router.get("/debriefs")
-async def list_debriefs(limit: int = 50) -> dict:
-    items = list(_DEBRIEFS)[-limit:][::-1]
-    return {"debriefs": items, "count": len(items), "total": len(_DEBRIEFS)}
+async def list_debriefs(limit: int = 50, db: AsyncSession = Depends(get_session)) -> dict:
+    items = await list_feedback_entries(db=db, limit=limit)
+    return {"debriefs": items, "count": len(items), "total": await count_feedback_entries(db=db)}

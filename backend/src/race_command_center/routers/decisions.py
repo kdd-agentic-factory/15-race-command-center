@@ -8,6 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from race_command_center.auth_deps import Principal, get_current_principal
 from race_command_center.database import get_session
 from race_command_center.models.decision import CrewChiefDecision, DecisionApprove, DecisionReject
+from race_command_center.services.governance_reporting import (
+    count_governance_actions,
+    list_governance_actions,
+    persist_governance_action,
+)
 from race_command_center.utils.ids import new_decision_id
 from race_command_center.utils.time import utcnow_iso
 
@@ -111,9 +116,17 @@ async def approve_decision(
             "notes": payload.notes,
         },
     )
-    await db.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail=f"Decision {decision_id!r} not found")
+    await persist_governance_action(
+        decision_id=decision_id,
+        action_type="approve",
+        actor=effective_approver,
+        notes=payload.notes,
+        payload={"status": "approved"},
+        db=db,
+    )
+    await db.commit()
     logger.info("Decision approved: %s by %s", decision_id, effective_approver)
     return {"decision_id": decision_id, "status": "approved", "approved_by": effective_approver}
 
@@ -135,9 +148,17 @@ async def reject_decision(
         """),
         {"id": decision_id, "decided_at": utcnow_iso(), "notes": f"Rejected by {effective_rejector}: {payload.reason}"},
     )
-    await db.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail=f"Decision {decision_id!r} not found")
+    await persist_governance_action(
+        decision_id=decision_id,
+        action_type="reject",
+        actor=effective_rejector,
+        notes=payload.reason,
+        payload={"status": "rejected"},
+        db=db,
+    )
+    await db.commit()
     logger.info("Decision rejected: %s by %s — %s", decision_id, effective_rejector, payload.reason)
     return {"decision_id": decision_id, "status": "rejected", "rejected_by": effective_rejector, "reason": payload.reason}
 
@@ -152,11 +173,24 @@ async def request_simulation(
         text("UPDATE decisions SET status = 'simulation_required' WHERE decision_id = :id"),
         {"id": decision_id},
     )
-    await db.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail=f"Decision {decision_id!r} not found")
+    await persist_governance_action(
+        decision_id=decision_id,
+        action_type="request_simulation",
+        actor=principal.display_name or principal.id,
+        payload={"status": "simulation_required"},
+        db=db,
+    )
+    await db.commit()
     logger.info(
         "Simulation requested for decision %s by %s",
         decision_id, principal.display_name or principal.id,
     )
     return {"decision_id": decision_id, "status": "simulation_required"}
+
+
+@router.get("/{decision_id}/history")
+async def decision_history(decision_id: str, db: AsyncSession = Depends(get_session)):
+    actions = await list_governance_actions(decision_id=decision_id, db=db)
+    return {"decision_id": decision_id, "actions": actions, "total": await count_governance_actions(decision_id=decision_id, db=db)}

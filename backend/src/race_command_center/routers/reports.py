@@ -1,11 +1,18 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from race_command_center.database import get_session
 from race_command_center.models.report import Report, ReportRequest
+from race_command_center.services.governance_reporting import (
+    count_report_snapshots,
+    get_report_snapshot,
+    list_report_snapshots,
+    persist_report_snapshot,
+)
 from race_command_center.utils.ids import new_report_id
 from race_command_center.utils.time import utcnow_iso
 
 router = APIRouter()
-
-_reports: dict[str, Report] = {}
 
 REPORT_TYPES = [
     "crew_chief_report", "setup_change_report", "telemetry_evidence_report",
@@ -14,12 +21,13 @@ REPORT_TYPES = [
 
 
 @router.get("")
-async def list_reports():
-    return {"reports": list(_reports.values()), "total": len(_reports), "report_types": REPORT_TYPES}
+async def list_reports(db: AsyncSession = Depends(get_session)):
+    reports = await list_report_snapshots(db=db)
+    return {"reports": reports, "total": await count_report_snapshots(db=db), "report_types": REPORT_TYPES}
 
 
 @router.post("", status_code=201)
-async def generate_report(payload: ReportRequest):
+async def generate_report(payload: ReportRequest, db: AsyncSession = Depends(get_session)):
     report_id = new_report_id()
     title_map = {
         "crew_chief_report": "Crew Chief Session Report",
@@ -46,13 +54,14 @@ async def generate_report(payload: ReportRequest):
         ] if payload.include_evidence else [],
         mode="mock",
     )
-    _reports[report_id] = report
+    await persist_report_snapshot(report, db=db)
+    await db.commit()
     return report
 
 
 @router.get("/{report_id}")
-async def get_report(report_id: str):
-    report = _reports.get(report_id)
+async def get_report(report_id: str, db: AsyncSession = Depends(get_session)):
+    report = await get_report_snapshot(report_id, db=db)
     if not report:
         return {"report_id": report_id, "status": "not_found"}
     return report
