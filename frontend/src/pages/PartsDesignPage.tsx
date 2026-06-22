@@ -1,59 +1,102 @@
 import { useState } from "react";
+import {
+  askBlueprintDesignBrief,
+  type BlueprintPartContext,
+} from "../api/copilot";
+import { type PartStatus, type RiskLevel } from "../types/part";
 
-type PartStatus = "concept" | "designed" | "simulated" | "approved_for_manufacturing" | "manufactured" | "mounted" | "tested" | "rejected" | "archived";
+const LIFECYCLE: PartStatus[] = [
+  "concept",
+  "designed",
+  "simulated",
+  "approved_for_manufacturing",
+  "manufactured",
+  "mounted",
+  "tested",
+];
 
-const LIFECYCLE: PartStatus[] = ["concept", "designed", "simulated", "approved_for_manufacturing", "manufactured", "mounted", "tested"];
-
-const parts = [
+const parts: BlueprintPartContext[] = [
   {
-    id: "part-brake-jerez",
+    part_id: "part-brake-jerez",
     name: "Brake Duct Jerez V1",
-    type: "Cooling",
-    circuit: "Jerez",
-    status: "designed" as PartStatus,
-    risk: "low",
-    impact: "Stable brake pressure and reduced fade risk in long braking zones.",
+    part_type: "Cooling",
+    target_circuit_id: "Jerez",
+    status: "designed",
+    risk_level: "low",
+    expected_impact: "Stable brake pressure and reduced fade risk in long braking zones.",
     material: "PA12_CF",
-    weight: "142g",
-    problem: "Front brake overheating under repeated heavy braking at T1 and T5.",
-    hypothesis: "Increased airflow through modified duct reduces brake temperature by 15°C.",
+    estimated_weight_g: 142,
+    problem_statement: "Front brake overheating under repeated heavy braking at T1 and T5.",
+    technical_hypothesis: "Increased airflow through modified duct reduces brake temperature by 15°C.",
+    manufacturing_method: "SLS nylon",
   },
   {
-    id: "part-tire-duct",
+    part_id: "part-tire-duct",
     name: "Rear Tire Cooling Duct",
-    type: "Thermal Management",
-    circuit: "Jerez",
-    status: "simulated" as PartStatus,
-    risk: "medium",
-    impact: "Reduce rear carcass temperature drift in long drive phases.",
+    part_type: "Thermal Management",
+    target_circuit_id: "Jerez",
+    status: "simulated",
+    risk_level: "medium",
+    expected_impact: "Reduce rear carcass temperature drift in long drive phases.",
     material: "Carbon fiber composite",
-    weight: "85g",
-    problem: "Rear carcass temperature drift in long drive phases causes spin.",
-    hypothesis: "Directed airflow reduces carcass temperature accumulation.",
+    estimated_weight_g: 85,
+    problem_statement: "Rear carcass temperature drift in long drive phases causes spin.",
+    technical_hypothesis: "Directed airflow reduces carcass temperature accumulation.",
+    manufacturing_method: "Composite layup",
   },
   {
-    id: "part-deflector-mugello",
+    part_id: "part-deflector-mugello",
     name: "Low-Drag Side Deflector",
-    type: "Aerodynamic",
-    circuit: "Mugello",
-    status: "concept" as PartStatus,
-    risk: "high",
-    impact: "Improve high-speed stability with minimal drag penalty.",
+    part_type: "Aerodynamic",
+    target_circuit_id: "Mugello",
+    status: "concept",
+    risk_level: "high",
+    expected_impact: "Improve high-speed stability with minimal drag penalty.",
     material: "TBD",
-    weight: "TBD",
-    problem: "High-speed instability on Mugello straight causes rider confidence loss.",
-    hypothesis: "Shaped deflector reduces drag while adding lateral stability.",
+    estimated_weight_g: undefined,
+    problem_statement: "High-speed instability on Mugello straight causes rider confidence loss.",
+    technical_hypothesis: "Shaped deflector reduces drag while adding lateral stability.",
+    manufacturing_method: "TBD",
   },
 ];
 
-const riskClass: Record<string, string> = {
+const riskClass: Record<RiskLevel, string> = {
   low: "badge-ok",
   medium: "badge-warn",
   high: "badge-danger",
+  critical: "badge-danger",
 };
 
-export function PartsDesignPage() {
-  const [selected, setSelected] = useState(parts[0]);
+export type BlueprintDesignState =
+  | { status: "idle" }
+  | { status: "pending" }
+  | { status: "success"; answer: string }
+  | { status: "error"; message: string };
+
+export type PartsDesignPageViewProps = {
+  parts: BlueprintPartContext[];
+  selectedPart: BlueprintPartContext;
+  onSelectPart: (part: BlueprintPartContext) => void;
+  blueprintState: BlueprintDesignState;
+  onGenerateBlueprint: () => void | Promise<void>;
+};
+
+function formatWeight(estimatedWeightG?: number) {
+  return typeof estimatedWeightG === "number" ? `${estimatedWeightG}g` : "TBD";
+}
+
+function formatStatusLabel(status: PartStatus) {
+  return status.replace(/_/g, " ");
+}
+
+export function PartsDesignPageView({
+  parts,
+  selectedPart,
+  onSelectPart,
+  blueprintState,
+  onGenerateBlueprint,
+}: PartsDesignPageViewProps) {
+  const isGenerating = blueprintState.status === "pending";
 
   return (
     <div className="space-y-6">
@@ -61,33 +104,35 @@ export function PartsDesignPage() {
         <p className="eyebrow">Circuit-Specific Parts</p>
         <h1 className="mt-2 text-3xl font-semibold">Parts design & validation</h1>
         <p className="mt-2 max-w-3xl text-zinc-400">
-          Manage circuit-specific components from concept to simulation, approval, manufacturing, mounting and post-session validation.
+          Manage circuit-specific components from concept to simulation, approval, manufacturing,
+          mounting and post-session validation.
         </p>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        {parts.map((p) => (
+        {parts.map((part) => (
           <button
-            key={p.id}
-            onClick={() => setSelected(p)}
+            key={part.part_id}
+            type="button"
+            onClick={() => onSelectPart(part)}
             className={`rounded-2xl border p-5 text-left transition-colors ${
-              selected.id === p.id
+              selectedPart.part_id === part.part_id
                 ? "border-red-600 bg-red-950/20"
                 : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
             }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="font-semibold">{p.name}</h2>
-                <p className="mt-0.5 text-xs text-zinc-500">{p.type}</p>
+                <h2 className="font-semibold">{part.name}</h2>
+                <p className="mt-0.5 text-xs text-zinc-500">{part.part_type}</p>
               </div>
-              <span className="badge-neutral shrink-0">{p.status}</span>
+              <span className="badge-neutral shrink-0">{part.status}</span>
             </div>
-            <p className="mt-3 text-xs text-zinc-500">Target: {p.circuit}</p>
-            <p className="mt-2 text-sm text-zinc-300 line-clamp-2">{p.impact}</p>
+            <p className="mt-3 text-xs text-zinc-500">Target: {part.target_circuit_id}</p>
+            <p className="mt-2 text-sm text-zinc-300 line-clamp-2">{part.expected_impact}</p>
             <div className="mt-4 flex items-center justify-between">
-              <span className={riskClass[p.risk]}>risk: {p.risk}</span>
-              <span className="text-xs text-zinc-600">{p.material}</span>
+              <span className={riskClass[part.risk_level]}>risk: {part.risk_level}</span>
+              <span className="text-xs text-zinc-600">{part.material}</span>
             </div>
           </button>
         ))}
@@ -96,71 +141,149 @@ export function PartsDesignPage() {
       <div className="panel space-y-4">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-semibold">{selected.name}</h2>
-            <p className="mt-0.5 text-sm text-zinc-500">{selected.type} · {selected.circuit}</p>
+            <h2 className="text-xl font-semibold">{selectedPart.name}</h2>
+            <p className="mt-0.5 text-sm text-zinc-500">
+              {selectedPart.part_type} · {selectedPart.target_circuit_id}
+            </p>
           </div>
           <div className="flex gap-2">
-            <span className={riskClass[selected.risk]}>risk: {selected.risk}</span>
-            <span className="badge-neutral">{selected.status}</span>
+            <span className={riskClass[selectedPart.risk_level]}>risk: {selectedPart.risk_level}</span>
+            <span className="badge-neutral">{selectedPart.status}</span>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Problem</p>
-            <p className="mt-1 text-sm text-zinc-300">{selected.problem}</p>
+            <p className="mt-1 text-sm text-zinc-300">{selectedPart.problem_statement}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Technical Hypothesis</p>
-            <p className="mt-1 text-sm text-zinc-300">{selected.hypothesis}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+              Technical Hypothesis
+            </p>
+            <p className="mt-1 text-sm text-zinc-300">{selectedPart.technical_hypothesis}</p>
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Expected Impact</p>
-            <p className="mt-1 text-sm text-zinc-300">{selected.impact}</p>
+            <p className="mt-1 text-sm text-zinc-300">{selectedPart.expected_impact}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Material / Weight</p>
-            <p className="mt-1 text-sm text-zinc-300">{selected.material} · {selected.weight}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+              Material / Weight
+            </p>
+            <p className="mt-1 text-sm text-zinc-300">
+              {selectedPart.material} · {formatWeight(selectedPart.estimated_weight_g)}
+            </p>
+            <p className="mt-1 text-xs uppercase tracking-wide text-zinc-600">
+              Manufacturing: {selectedPart.manufacturing_method}
+            </p>
           </div>
         </div>
 
-        <div className="flex gap-2 flex-wrap">
-          <button className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onGenerateBlueprint}
+            disabled={isGenerating}
+            className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-red-950 disabled:text-red-300"
+          >
+            {isGenerating ? "Generating Blueprint design..." : "Generate Blueprint design"}
+          </button>
+          <button
+            type="button"
+            className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:text-white"
+          >
             Request Simulation
           </button>
-          <button className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:text-white">
+          <button
+            type="button"
+            className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:text-white"
+          >
             Advance Status
           </button>
-          <button className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:text-white">
+          <button
+            type="button"
+            className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:text-white"
+          >
             View Evidence
           </button>
         </div>
+
+        {blueprintState.status === "pending" && (
+          <p role="status" className="text-sm text-zinc-400">
+            Generating Blueprint design brief...
+          </p>
+        )}
+
+        {blueprintState.status === "success" && (
+          <div role="status" className="rounded-xl border border-emerald-900 bg-emerald-950/20 p-4 text-sm text-emerald-200">
+            <p className="font-medium">Blueprint design brief ready</p>
+            <p className="mt-2 text-emerald-100">{blueprintState.answer}</p>
+          </div>
+        )}
+
+        {blueprintState.status === "error" && (
+          <div role="alert" className="rounded-xl border border-red-900 bg-red-950/20 p-4 text-sm text-red-200">
+            Blueprint generation failed: {blueprintState.message}
+          </div>
+        )}
       </div>
 
       <div className="panel">
         <h2 className="mb-4 text-sm font-semibold text-zinc-400">Part Lifecycle</h2>
-        <div className="flex gap-1.5 flex-wrap">
-          {LIFECYCLE.map((step, i) => {
-            const activeIdx = LIFECYCLE.indexOf(selected.status);
-            const isPast = i < activeIdx;
-            const isCurrent = i === activeIdx;
+        <div className="flex flex-wrap gap-1.5">
+          {LIFECYCLE.map((step, index) => {
+            const activeIndex = LIFECYCLE.indexOf(selectedPart.status);
+            const isPast = index < activeIndex;
+            const isCurrent = index === activeIndex;
             return (
               <div
                 key={step}
-                className={`flex-1 min-w-[90px] rounded-lg border px-2 py-2 text-center text-xs capitalize transition-colors ${
+                className={`min-w-[90px] flex-1 rounded-lg border px-2 py-2 text-center text-xs capitalize transition-colors ${
                   isCurrent
-                    ? "border-red-600 bg-red-950/30 text-red-300 font-semibold"
+                    ? "border-red-600 bg-red-950/30 font-semibold text-red-300"
                     : isPast
-                    ? "border-zinc-700 bg-zinc-900 text-zinc-400"
-                    : "border-zinc-800 bg-zinc-950 text-zinc-600"
+                      ? "border-zinc-700 bg-zinc-900 text-zinc-400"
+                      : "border-zinc-800 bg-zinc-950 text-zinc-600"
                 }`}
               >
-                {step.replace(/_/g, " ")}
+                {formatStatusLabel(step)}
               </div>
             );
           })}
         </div>
       </div>
     </div>
+  );
+}
+
+export function PartsDesignPage() {
+  const [selectedPart, setSelectedPart] = useState<BlueprintPartContext>(parts[0]);
+  const [blueprintState, setBlueprintState] = useState<BlueprintDesignState>({ status: "idle" });
+
+  const handleGenerateBlueprint = async () => {
+    setBlueprintState({ status: "pending" });
+    try {
+      const response = await askBlueprintDesignBrief(selectedPart);
+      setBlueprintState({ status: "success", answer: response.answer });
+    } catch (error) {
+      setBlueprintState({
+        status: "error",
+        message: error instanceof Error ? error.message : "Blueprint generation failed",
+      });
+    }
+  };
+
+  return (
+    <PartsDesignPageView
+      parts={parts}
+      selectedPart={selectedPart}
+      onSelectPart={(part) => {
+        setSelectedPart(part);
+        setBlueprintState({ status: "idle" });
+      }}
+      blueprintState={blueprintState}
+      onGenerateBlueprint={handleGenerateBlueprint}
+    />
   );
 }
