@@ -1,6 +1,9 @@
 """Copilot router — forwards AI queries to 16-race-ai-copilot; degrades gracefully."""
+from __future__ import annotations
+
 import logging
 import os
+from typing import Any
 
 import httpx
 from fastapi import APIRouter
@@ -10,6 +13,7 @@ router = APIRouter()
 
 _COPILOT_URL = os.getenv("RACE_AI_COPILOT_URL", "http://race-ai-copilot:8060")
 _TIMEOUT = float(os.getenv("COPILOT_TIMEOUT_S", "15"))
+_INTEGRATION_CHAT_PATH = "/api/v1/integrations/race-command-center/chat"
 
 # Fallback answers used when 16-race-ai-copilot is unreachable
 _FALLBACK_ANSWERS = {
@@ -45,6 +49,62 @@ def _fallback_answer(question: str) -> str:
     )
 
 
+def _is_blueprint_design_request(payload: dict[str, Any]) -> bool:
+    intent = str(payload.get("intent", "")).lower()
+    source = str(payload.get("source", "")).lower()
+    question = str(payload.get("question", payload.get("query", ""))).lower()
+    return (
+        intent == "blueprint_design_brief"
+        or source == "parts_design_page"
+        or any(token in question for token in ("blueprint", "design", "part"))
+    )
+
+
+def _build_blueprint_integration_payload(question: str, payload: dict[str, Any]) -> dict[str, Any]:
+    part_context = payload.get("part_context") or payload.get("context", {}).get("part_context", {})
+    tenant_id = payload.get("tenant_id") or payload.get("context", {}).get("tenant_id") or "parts-design"
+    request_id = payload.get("request_id") or payload.get("context", {}).get("request_id")
+    session_id = payload.get("session_id") or payload.get("context", {}).get("session_id")
+
+    return {
+        "context": {
+            "tenant": {
+                "tenant_id": tenant_id,
+                "user_role": payload.get("user_role", "designer"),
+                "approval_scope": payload.get("approval_scope", "propose"),
+            },
+            "request_id": request_id,
+            "session_id": session_id,
+        },
+        "reporting": {
+            "report_type": "blueprint_design_brief",
+            "report_id": f"blueprint-{part_context.get('part_id', 'unknown')}",
+        },
+        "query": question,
+        "command_center_id": part_context.get("part_id", payload.get("command_center_id", "cc-blueprint")),
+        "vehicle_context": {
+            "source": "parts_design_page",
+            "part_context": part_context,
+        },
+    }
+
+
+def _normalize_blueprint_bridge_response(question: str, upstream: dict[str, Any]) -> dict[str, Any]:
+    approval = upstream.get("approval", {}) if isinstance(upstream.get("approval"), dict) else {}
+    return {
+        "question": question,
+        "answer": upstream.get("message") or upstream.get("answer") or _fallback_answer(question),
+        "evidence": upstream.get("evidence", []),
+        "tool_calls": upstream.get("tool_calls", []),
+        "requires_approval": bool(approval.get("required", False)),
+        "approval_status": "required" if approval.get("required", False) else "not_required",
+        "confidence": float(upstream.get("confidence", 0.89 if not approval.get("required", False) else 0.75)),
+        "mode": "blueprint_bridge",
+        "recommendations": upstream.get("recommendations", []),
+        "next_step": upstream.get("next_step"),
+    }
+
+
 @router.post("/ask")
 async def ask_copilot(payload: dict):
     """Forward a question to the Race AI Copilot service (16)."""
@@ -52,6 +112,11 @@ async def ask_copilot(payload: dict):
 
     try:
         async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+            if _is_blueprint_design_request(payload):
+                upstream_payload = _build_blueprint_integration_payload(question, payload)
+                resp = await client.post(f"{_COPILOT_URL}{_INTEGRATION_CHAT_PATH}", json=upstream_payload)
+                resp.raise_for_status()
+                return _normalize_blueprint_bridge_response(question, resp.json())
             resp = await client.post(
                 f"{_COPILOT_URL}/api/v1/chat",
                 json={"message": question, **payload},
