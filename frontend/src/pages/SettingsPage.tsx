@@ -1,4 +1,22 @@
+import { useState } from "react";
+import { clearAuthToken, getAuthToken, setAuthToken } from "../api/client";
+
 export function SettingsPage() {
+  const [token, setToken] = useState(() => getAuthToken() ?? "");
+  const [savedToken, setSavedToken] = useState(() => getAuthToken() ?? "");
+
+  const handleSave = () => {
+    if (!token.trim()) return;
+    setAuthToken(token);
+    setSavedToken(token.trim());
+  };
+
+  const handleClear = () => {
+    clearAuthToken();
+    setToken("");
+    setSavedToken("");
+  };
+
   return (
     <div className="space-y-6">
       <header>
@@ -27,6 +45,40 @@ export function SettingsPage() {
         </div>
 
         <div className="panel space-y-4">
+          <h2 className="text-sm font-semibold text-zinc-400">Authentication</h2>
+          <div>
+            <label className="text-xs text-zinc-500">Bearer token</label>
+            <textarea
+              value={token}
+              onChange={(event) => setToken(event.target.value)}
+              rows={4}
+              className="mt-1 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-300 focus:outline-none"
+              placeholder="Paste JWT access token here"
+            />
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <span className={savedToken ? "badge-ok" : "badge-neutral"}>{savedToken ? "stored" : "empty"}</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-800"
+                >
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-500"
+                >
+                  Save token
+                </button>
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-zinc-500">
+              Saved token is attached automatically to frontend API requests.
+            </p>
+          </div>
+
           <h2 className="text-sm font-semibold text-zinc-400">Feature Flags</h2>
           {[
             ["Mock Mode", true],

@@ -20,7 +20,7 @@ class _FakeResponse:
 
 class _FakeAsyncClient:
     def __init__(self, *args: Any, **kwargs: Any):
-        self.calls: list[tuple[str, dict[str, Any] | None]] = []
+        self.calls: list[tuple[str, dict[str, Any] | None, dict[str, Any] | None]] = []
 
     async def __aenter__(self) -> "_FakeAsyncClient":
         return self
@@ -28,8 +28,13 @@ class _FakeAsyncClient:
     async def __aexit__(self, exc_type, exc, tb) -> None:
         return None
 
-    async def post(self, url: str, json: dict[str, Any] | None = None) -> _FakeResponse:
-        self.calls.append((url, json))
+    async def post(
+        self,
+        url: str,
+        json: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+    ) -> _FakeResponse:
+        self.calls.append((url, json, headers))
         payload = {
             "message": "Blueprint design brief routed via command-center integration",
             "evidence": [{"source": "race-command-center:context", "type": "session", "confidence": 0.0}],
@@ -50,7 +55,7 @@ async def test_blueprint_request_routes_to_command_center_integration(monkeypatc
     fake_client = _FakeAsyncClient()
     monkeypatch.setattr(copilot_router.httpx, "AsyncClient", lambda *args, **kwargs: fake_client)
 
-    body = await copilot_router.ask_copilot(
+    body = await copilot_router._forward_to_copilot(
         {
             "question": "Generate a Blueprint design brief for the rear tire cooling duct.",
             "intent": "blueprint_design_brief",
@@ -60,7 +65,8 @@ async def test_blueprint_request_routes_to_command_center_integration(monkeypatc
                 "name": "Rear Tire Cooling Duct",
                 "part_type": "Thermal Management",
             },
-        }
+        },
+        authorization="Bearer test-token",
     )
 
     assert body["mode"] == "blueprint_bridge"
@@ -70,6 +76,7 @@ async def test_blueprint_request_routes_to_command_center_integration(monkeypatc
     assert fake_client.calls[0][0].endswith("/api/v1/integrations/race-command-center/chat")
     assert fake_client.calls[0][1]["reporting"]["report_type"] == "blueprint_design_brief"
     assert fake_client.calls[0][1]["vehicle_context"]["part_context"]["part_id"] == "part-tire-duct"
+    assert fake_client.calls[0][2]["Authorization"] == "Bearer test-token"
 
 
 @pytest.mark.asyncio
@@ -77,6 +84,6 @@ async def test_non_blueprint_request_preserves_existing_chat_route(monkeypatch):
     fake_client = _FakeAsyncClient()
     monkeypatch.setattr(copilot_router.httpx, "AsyncClient", lambda *args, **kwargs: fake_client)
 
-    response = await copilot_router.ask_copilot({"question": "Summarize the latest stint deltas for Jerez"})
+    response = await copilot_router._forward_to_copilot({"question": "Summarize the latest stint deltas for Jerez"})
 
     assert fake_client.calls[0][0].endswith("/api/v1/chat")

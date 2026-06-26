@@ -1,6 +1,9 @@
 app = "kdd-rjz-race"
 primary_region = "fra"
 
+[env]
+  RACE_AI_COPILOT_URL = "https://kdd-rjz-copilot.fly.dev"
+
 [build]
   dockerfile = "Dockerfile"
 
@@ -9,7 +12,7 @@ primary_region = "fra"
   force_https = true
   auto_stop_machines = "stop"
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
 
 [checks.health]
   type = "http"

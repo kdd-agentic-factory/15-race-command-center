@@ -6,7 +6,7 @@ import os
 from typing import Any
 
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -105,26 +105,39 @@ def _normalize_blueprint_bridge_response(question: str, upstream: dict[str, Any]
     }
 
 
-@router.post("/ask")
-async def ask_copilot(payload: dict):
-    """Forward a question to the Race AI Copilot service (16)."""
+async def _forward_to_copilot(payload: dict[str, Any], authorization: str | None = None) -> dict[str, Any]:
     question = payload.get("question", payload.get("query", ""))
+    headers = {"Authorization": authorization} if authorization else None
 
-    try:
-        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-            if _is_blueprint_design_request(payload):
-                upstream_payload = _build_blueprint_integration_payload(question, payload)
-                resp = await client.post(f"{_COPILOT_URL}{_INTEGRATION_CHAT_PATH}", json=upstream_payload)
-                resp.raise_for_status()
-                return _normalize_blueprint_bridge_response(question, resp.json())
+    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+        if _is_blueprint_design_request(payload):
+            upstream_payload = _build_blueprint_integration_payload(question, payload)
             resp = await client.post(
-                f"{_COPILOT_URL}/api/v1/chat",
-                json={"message": question, **payload},
+                f"{_COPILOT_URL}{_INTEGRATION_CHAT_PATH}",
+                json=upstream_payload,
+                headers=headers,
             )
             resp.raise_for_status()
-            data = resp.json()
-            data.setdefault("question", question)
-            return data
+            return _normalize_blueprint_bridge_response(question, resp.json())
+
+        resp = await client.post(
+            f"{_COPILOT_URL}/api/v1/chat",
+            json={"message": question, **payload},
+            headers=headers,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        data.setdefault("question", question)
+        return data
+
+
+@router.post("/ask")
+async def ask_copilot(payload: dict, request: Request):
+    """Forward a question to the Race AI Copilot service (16)."""
+    authorization = request.headers.get("Authorization")
+
+    try:
+        return await _forward_to_copilot(payload, authorization)
     except Exception as exc:
         logger.warning("Race AI Copilot unavailable (%s) — serving fallback answer", exc)
 

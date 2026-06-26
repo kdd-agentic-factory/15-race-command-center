@@ -23,8 +23,9 @@ _AUTH_URL_RAW: str = os.getenv(
     "AUTH_DATABASE_URL",
     os.getenv("DATABASE_URL", ""),
 )
-# asyncpg requires plain postgresql:// (not postgresql+asyncpg://)
-AUTH_DATABASE_URL: str = _AUTH_URL_RAW.replace("postgresql+asyncpg://", "postgresql://")
+# asyncpg requires plain postgresql:// (not postgresql+asyncpg://).
+# Strip libpq query params and enable TLS explicitly in _get_conn().
+AUTH_DATABASE_URL: str = _AUTH_URL_RAW.split("?", 1)[0].replace("postgresql+asyncpg://", "postgresql://")
 
 if not JWT_SECRET:
     logger.critical("JWT_SECRET environment variable is REQUIRED — aborting startup")
@@ -56,7 +57,7 @@ def verify_token(token: str) -> dict:
 # ── Database helpers ───────────────────────────────────────────────────────────
 
 async def _get_conn() -> asyncpg.Connection:
-    return await asyncpg.connect(AUTH_DATABASE_URL, timeout=10)
+    return await asyncpg.connect(AUTH_DATABASE_URL, timeout=10, ssl=True)
 
 
 async def authenticate_user(email: str, password: str) -> dict | None:
