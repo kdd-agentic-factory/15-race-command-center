@@ -1,4 +1,4 @@
-import { Activity, Bot, FlaskConical, Cpu, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Activity, Bot, FlaskConical, Cpu, AlertTriangle, CheckCircle } from "lucide-react";
 
 const services = [
   { name: "KDD Pipelines", id: "06", status: "ok", latency: "38ms" },

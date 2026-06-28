@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { post } from "../api/client";
 
 type SimResult = {
   sim_id: string;
@@ -19,17 +20,18 @@ export function DigitalTwinPage() {
   const runSim = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/simulation/what-if", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          baseline_setup_id: "setup-base-jerez",
-          setup_change: { [form.param]: form.value },
-          circuit_id: "jerez",
-          notes: form.notes,
-        }),
+      const data = await post<{
+        simulation_id: string;
+        estimated_lap_delta_ms?: number;
+        spin_risk?: string;
+        thermal_risk?: string;
+        status: string;
+      }>("/simulation/what-if", {
+        baseline_setup_id: "setup-base-jerez",
+        setup_change: { [form.param]: form.value },
+        circuit_id: "jerez",
+        notes: form.notes,
       });
-      const data = await res.json();
       setResults((r) => [
         {
           sim_id: data.simulation_id,

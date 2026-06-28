@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
 import { setAuthToken } from "./api/client";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./index.css";
 
 function bootstrapAuthTokenFromUrl() {
@@ -23,6 +24,8 @@ bootstrapAuthTokenFromUrl();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
   </React.StrictMode>
 );

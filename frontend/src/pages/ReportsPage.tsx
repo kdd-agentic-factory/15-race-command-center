@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FileText, Download } from "lucide-react";
+import { post } from "../api/client";
 
 const REPORT_TYPES = [
   { id: "crew_chief_report", label: "Crew Chief Report", desc: "Post-session operational summary" },
@@ -24,17 +25,12 @@ export function ReportsPage() {
   const generate = async (typeId: string, typeLabel: string) => {
     setGenerating(typeId);
     try {
-      const res = await fetch("/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          report_type: typeId,
-          session_id: "jerez-fp2-2026-05-03",
-          circuit_id: "jerez",
-          include_evidence: true,
-        }),
+      const data = await post<{ report_id: string }>("/reports", {
+        report_type: typeId,
+        session_id: "jerez-fp2-2026-05-03",
+        circuit_id: "jerez",
+        include_evidence: true,
       });
-      const data = await res.json();
       setReports((r) => [
         { id: data.report_id, type: typeId, label: typeLabel, status: "generated", created_at: new Date().toLocaleTimeString() },
         ...r,
