@@ -3,15 +3,15 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://race-command-center-03aba6c5-1146-4dde-848e-528daa1bab11.fly.dev/$1"
+      "destination": "https://kdd-rjz-race.fly.dev/$1"
     },
     {
       "source": "/ws/(.*)",
-      "destination": "https://race-command-center-03aba6c5-1146-4dde-848e-528daa1bab11.fly.dev/ws/$1"
+      "destination": "https://kdd-rjz-race.fly.dev/ws/$1"
     },
     {
       "source": "/copilot-api/(.*)",
-      "destination": "https://race-ai-copilot-03aba6c5-1146-4dde-848e-528daa1bab11.fly.dev/$1"
+      "destination": "https://kdd-rjz-copilot.fly.dev/$1"
     },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
