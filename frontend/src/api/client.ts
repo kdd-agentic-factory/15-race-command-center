@@ -13,6 +13,16 @@ function buildHeaders(extra?: HeadersInit): HeadersInit {
     : extra ?? {};
 }
 
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 export function setAuthToken(token: string) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(AUTH_TOKEN_KEY, token.trim());
@@ -27,10 +37,22 @@ export function getAuthToken() {
   return readAuthToken();
 }
 
+async function handleResponse<T>(res: Response, method: string, path: string): Promise<T> {
+  if (res.status === 401) {
+    clearAuthToken();
+    window.location.href = "/settings";
+    throw new ApiError(401, "Session expired — please re-authenticate");
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, body.detail ?? `${method} ${path} → ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { headers: buildHeaders() });
-  if (!res.ok) throw new Error(`GET ${path} → ${res.status}`);
-  return res.json();
+  return handleResponse<T>(res, "GET", path);
 }
 
 export async function post<T>(path: string, body: unknown): Promise<T> {
@@ -39,8 +61,7 @@ export async function post<T>(path: string, body: unknown): Promise<T> {
     headers: buildHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`POST ${path} → ${res.status}`);
-  return res.json();
+  return handleResponse<T>(res, "POST", path);
 }
 
 export async function patch<T>(path: string, body: unknown): Promise<T> {
@@ -49,6 +70,5 @@ export async function patch<T>(path: string, body: unknown): Promise<T> {
     headers: buildHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`PATCH ${path} → ${res.status}`);
-  return res.json();
+  return handleResponse<T>(res, "PATCH", path);
 }

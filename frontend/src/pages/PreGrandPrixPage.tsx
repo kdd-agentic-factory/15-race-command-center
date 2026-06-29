@@ -131,10 +131,10 @@ export function PreGrandPrixPage() {
       </div>
 
       <div className="flex gap-3">
-        <button className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-medium text-white">
+        <button type="button" className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-medium text-white">
           Generate Pre-GP Report
         </button>
-        <button className="rounded-xl border border-zinc-700 px-5 py-2.5 text-sm text-zinc-300 hover:text-white">
+        <button type="button" className="rounded-xl border border-zinc-700 px-5 py-2.5 text-sm text-zinc-300 hover:text-white">
           Export FP1 Plan
         </button>
       </div>

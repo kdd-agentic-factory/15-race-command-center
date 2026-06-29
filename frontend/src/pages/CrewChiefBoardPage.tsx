@@ -118,12 +118,14 @@ export function CrewChiefBoardPage() {
             {dec.status !== "approved" && dec.status !== "rejected" && (
               <div className="flex flex-wrap gap-2">
                 <button
+                  type="button"
                   onClick={() => update(dec.id, "approved")}
                   className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white"
                 >
                   Approve
                 </button>
                 <button
+                  type="button"
                   onClick={() => update(dec.id, "rejected")}
                   className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:text-white"
                 >
@@ -131,13 +133,14 @@ export function CrewChiefBoardPage() {
                 </button>
                 {!dec.simulation && (
                   <button
+                    type="button"
                     onClick={() => update(dec.id, "simulation_completed")}
                     className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:text-white"
                   >
                     Request Simulation
                   </button>
                 )}
-                <button className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:text-white">
+                <button type="button" className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:text-white">
                   Generate Report
                 </button>
               </div>
