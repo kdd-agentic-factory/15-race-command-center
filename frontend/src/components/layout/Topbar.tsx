@@ -14,32 +14,32 @@ export function Topbar() {
   }, []);
 
   return (
-    <header className="flex items-center justify-between border-b border-zinc-800 bg-zinc-950 px-6 py-3">
+    <header className="flex items-center justify-between border-b border-kdd-border bg-kdd-bg px-6 py-3">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 text-sm">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-          <span className="text-emerald-400 font-medium">LIVE</span>
+          <span className="h-2 w-2 animate-pulse rounded-full bg-kdd-green" />
+          <span className="text-kdd-green font-medium">LIVE</span>
         </div>
-        <div className="flex items-center gap-1.5 text-sm text-zinc-400">
-          <MapPin className="h-3.5 w-3.5 text-red-500" />
-          <span>Jerez · FP2</span>
+        <div className="flex items-center gap-1.5 text-sm text-kdd-dim">
+          <MapPin className="h-3.5 w-3.5 text-kdd-accent" />
+          <span className="font-kdd-sans">Jerez · FP2</span>
         </div>
-        <div className="flex items-center gap-1.5 text-sm text-zinc-400">
+        <div className="flex items-center gap-1.5 text-sm text-kdd-dim">
           <Gauge className="h-3.5 w-3.5" />
           <span>
-            Lap <strong className="text-zinc-100">{lap}</strong>
+            Lap <strong className="text-kdd-text">{lap}</strong>
           </span>
         </div>
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="hidden items-center gap-2 text-xs text-zinc-500 sm:flex">
+        <div className="hidden items-center gap-2 text-xs text-kdd-dim sm:flex">
           <Radio className="h-3.5 w-3.5" />
-          <span>jerez-fp2-2026-05-03</span>
+          <span className="font-kdd-mono">jerez-fp2-2026-05-03</span>
         </div>
-        <div className="flex items-center gap-1.5 text-sm text-zinc-300">
-          <Clock className="h-3.5 w-3.5 text-zinc-500" />
-          <span className="font-mono text-xs">{time}</span>
+        <div className="flex items-center gap-1.5 text-sm text-kdd-dim">
+          <Clock className="h-3.5 w-3.5 text-kdd-dim" />
+          <span className="font-kdd-mono text-xs text-kdd-text">{time}</span>
         </div>
       </div>
     </header>

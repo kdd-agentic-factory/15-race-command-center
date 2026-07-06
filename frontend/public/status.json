@@ -1,0 +1,28 @@
+{
+  "service": "race-command-center",
+  "status": "preview",
+  "version": "0.1.0",
+  "routes": {
+    "launch": "available",
+    "pitwall": "available",
+    "telemetry": "available",
+    "circuit": "available",
+    "tires": "available",
+    "setup": "available",
+    "parts": "available",
+    "preGp": "available",
+    "crewChief": "available",
+    "strategy": "available",
+    "copilot": "available",
+    "digitalTwin": "available",
+    "reports": "available"
+  },
+  "capabilities": {
+    "sessionLaunch": true,
+    "raceSessionContext": true,
+    "aiCopilot": "preview",
+    "telemetry": "demo",
+    "digitalTwin": "preview",
+    "reports": "preview"
+  }
+}

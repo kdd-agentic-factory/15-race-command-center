@@ -1,4 +1,11 @@
 import { useState } from "react";
+import { useRaceSession } from "../hooks/useRaceSession";
+import {
+  sessionBadgeLabel,
+  getDegradationMessages,
+  SESSION_BADGE_CLASSES,
+} from "../lib/session-badge";
+import { DEGRADATION_MESSAGES } from "../lib/session-degradation";
 
 const BASELINE = {
   id: "setup-base-jerez",
@@ -45,27 +52,73 @@ const rows: { key: SetupKey; label: string; unit: string }[] = [
 ];
 
 export function SetupManagementPage() {
+  const { session, hasPersistedSession } = useRaceSession();
   const [view, setView] = useState<"diff" | "baseline" | "proposed">("diff");
 
   const changes = rows.filter((r) => String(BASELINE[r.key]) !== String(PROPOSED[r.key]));
 
+  const badgeLabel = sessionBadgeLabel(session, hasPersistedSession);
+  const degradationMessages = getDegradationMessages(
+    session.telemetryStatus,
+    session.circuitConfidence,
+    session.dataSource,
+  );
+
+  const isMissingTelemetry = session.telemetryStatus === "missing";
+  const isPartialTelemetry = session.telemetryStatus === "partial";
+  const isSimulation = session.dataSource === "simulation";
+
   return (
-    <div className="space-y-6">
+    <div className="bg-kdd-bg text-kdd-text space-y-6">
       <header>
-        <p className="eyebrow">Setup Management</p>
+        <div className="flex items-center gap-3">
+          <p className="eyebrow">Setup Management</p>
+          <span className={SESSION_BADGE_CLASSES}>{badgeLabel}</span>
+        </div>
         <h1 className="mt-2 text-3xl font-semibold">Setup comparison & tracking</h1>
-        <p className="mt-2 text-zinc-400">
-          Compare baseline vs proposed · Track changes · Evidence-backed approval
+        <p className="mt-2 text-kdd-muted">
+          {session.circuitName} · {session.riderName} · {session.bikeName} · {session.mode.toUpperCase()} mode
         </p>
       </header>
+
+      {degradationMessages.length > 0 && (
+        <div className="space-y-2">
+          {degradationMessages.map((msg) => (
+            <div
+              key={msg}
+              className="rounded-kdd-md border border-kdd-yellow/40 bg-kdd-yellow-dim px-4 py-2 text-sm text-kdd-yellow"
+            >
+              {msg}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {isMissingTelemetry && (
+        <div className="rounded-kdd-md border border-kdd-orange/40 bg-kdd-orange-dim px-4 py-3 text-sm text-kdd-orange">
+          <strong>{DEGRADATION_MESSAGES.demoSetupPreview.split(".")[0]}.</strong> {DEGRADATION_MESSAGES.demoSetupPreview.split(". ").slice(1).join(". ")}
+        </div>
+      )}
+
+      {isPartialTelemetry && !isMissingTelemetry && (
+        <div className="rounded-kdd-md border border-kdd-yellow/40 bg-kdd-yellow-dim px-4 py-3 text-sm text-kdd-yellow">
+          <strong>{DEGRADATION_MESSAGES.partialTelemetrySetup.split(".")[0]}.</strong> {DEGRADATION_MESSAGES.partialTelemetrySetup.split(". ").slice(1).join(". ")}
+        </div>
+      )}
+
+      {isSimulation && (
+        <div className="rounded-kdd-md border border-kdd-cyan/40 bg-kdd-cyan-dim px-4 py-3 text-sm text-kdd-cyan">
+          <strong>{DEGRADATION_MESSAGES.predictedSetup.split(".")[0]}.</strong> {DEGRADATION_MESSAGES.predictedSetup.split(". ").slice(1).join(". ")}
+        </div>
+      )}
 
       <div className="flex gap-2">
         {(["diff", "baseline", "proposed"] as const).map((v) => (
           <button
             key={v}
             onClick={() => setView(v)}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-              view === v ? "bg-red-600 text-white" : "border border-zinc-700 text-zinc-400 hover:text-zinc-100"
+            className={`min-h-[44px] rounded-kdd-md px-4 py-2 text-sm font-medium transition-colors ${
+              view === v ? "bg-kdd-accent text-white" : "border border-kdd-border text-kdd-muted hover:text-kdd-text"
             }`}
           >
             {v === "diff" ? "Show Diff" : v === "baseline" ? "Baseline" : "Proposed"}
@@ -76,20 +129,20 @@ export function SetupManagementPage() {
       <div className="panel overflow-hidden p-0">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-800 bg-zinc-900">
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <tr className="border-b border-kdd-border bg-kdd-surface">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-kdd-dim">
                 Parameter
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-kdd-dim">
                 Baseline
               </th>
               {view !== "baseline" && (
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-kdd-dim">
                   Proposed
                 </th>
               )}
               {view === "diff" && (
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-kdd-dim">
                   Change
                 </th>
               )}
@@ -103,14 +156,14 @@ export function SetupManagementPage() {
               return (
                 <tr
                   key={key}
-                  className={`border-b border-zinc-800/50 ${changed && view === "diff" ? "bg-amber-950/10" : ""}`}
+                  className={`border-b border-kdd-border ${changed && view === "diff" ? "bg-amber-950/10" : ""}`}
                 >
-                  <td className="px-4 py-3 text-zinc-300">{label}</td>
-                  <td className="px-4 py-3 font-mono text-zinc-400">
+                  <td className="px-4 py-3 text-kdd-text">{label}</td>
+                  <td className="px-4 py-3 font-kdd-mono text-kdd-muted">
                     {bval}{unit && ` ${unit}`}
                   </td>
                   {view !== "baseline" && (
-                    <td className={`px-4 py-3 font-mono ${changed ? "text-amber-400 font-semibold" : "text-zinc-400"}`}>
+                    <td className={`px-4 py-3 font-kdd-mono ${changed ? "text-amber-400 font-semibold" : "text-kdd-muted"}`}>
                       {pval}{unit && ` ${unit}`}
                     </td>
                   )}
@@ -124,7 +177,7 @@ export function SetupManagementPage() {
             })}
             {view === "diff" && changes.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-zinc-500">
+                <td colSpan={4} className="px-4 py-6 text-center text-kdd-dim">
                   No differences found.
                 </td>
               </tr>
@@ -134,15 +187,15 @@ export function SetupManagementPage() {
       </div>
 
       {view === "diff" && (
-        <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3">
-          <span className="text-sm text-zinc-400">
+        <div className="flex items-center justify-between rounded-kdd-md border border-kdd-border bg-kdd-surface px-4 py-3">
+          <span className="text-sm text-kdd-muted">
             {changes.length} parameter{changes.length !== 1 ? "s" : ""} changed · Risk: medium
           </span>
           <div className="flex gap-2">
-            <button type="button" className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:text-white">
+            <button type="button" className="min-h-[44px] rounded-kdd-md border border-kdd-border px-4 py-2 text-sm text-kdd-text transition-colors duration-kdd-fast hover:bg-kdd-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kdd-accent">
               Request Simulation
             </button>
-            <button type="button" className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white">
+            <button type="button" className="min-h-[44px] rounded-kdd-md bg-kdd-accent px-4 py-2 text-sm font-medium text-white transition-colors duration-kdd-fast hover:bg-kdd-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kdd-accent">
               Propose to Crew Chief
             </button>
           </div>

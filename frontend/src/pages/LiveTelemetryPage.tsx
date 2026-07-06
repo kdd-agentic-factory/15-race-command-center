@@ -1,7 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
 } from "recharts";
+import { useRaceSession } from "../hooks/useRaceSession";
+import {
+  sessionBadgeLabel,
+  getDegradationMessages,
+  SESSION_BADGE_CLASSES,
+} from "../lib/session-badge";
 
 type TelemetrySample = {
   ts: number;
@@ -27,6 +40,7 @@ function RiskBadge({ value, thresholds }: { value: number; thresholds: [number, 
 }
 
 export function LiveTelemetryPage() {
+  const { session, hasPersistedSession } = useRaceSession();
   const [history, setHistory] = useState<TelemetrySample[]>([]);
   const [latest, setLatest] = useState<TelemetrySample | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -72,13 +86,38 @@ export function LiveTelemetryPage() {
     brake: s.brake_press_front,
   }));
 
+  const badgeLabel = sessionBadgeLabel(session, hasPersistedSession);
+  const degradationMessages = getDegradationMessages(
+    session.telemetryStatus,
+    session.circuitConfidence,
+    session.dataSource,
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="bg-kdd-bg text-kdd-text space-y-6">
       <header>
-        <p className="eyebrow">Live Telemetry</p>
+        <div className="flex items-center gap-3">
+          <p className="eyebrow">Live Telemetry</p>
+          <span className={SESSION_BADGE_CLASSES}>{badgeLabel}</span>
+        </div>
         <h1 className="mt-2 text-3xl font-semibold">High-frequency stream</h1>
-        <p className="mt-2 text-zinc-400">WebSocket · 10 Hz · Jerez FP2</p>
+        <p className="mt-2 text-kdd-muted">
+          WebSocket · 10 Hz · {session.circuitName} {session.mode.toUpperCase()} · {session.bikeName}
+        </p>
       </header>
+
+      {degradationMessages.length > 0 && (
+        <div className="space-y-2">
+          {degradationMessages.map((msg) => (
+            <div
+              key={msg}
+              className="rounded-kdd-md border border-kdd-yellow/40 bg-kdd-yellow-dim px-4 py-2 text-sm text-kdd-yellow"
+            >
+              {msg}
+            </div>
+          ))}
+        </div>
+      )}
 
       {latest && (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
@@ -91,9 +130,9 @@ export function LiveTelemetryPage() {
             { label: "Spin", value: latest.spin_ratio.toFixed(4), unit: "", thresh: [0.06, 0.09] as [number,number] },
           ].map(({ label, value, unit, thresh }) => (
             <div key={label} className="panel text-center">
-              <p className="text-xs text-zinc-500">{label}</p>
+              <p className="text-xs text-kdd-dim">{label}</p>
               <p className="mt-1 text-2xl font-bold">{value}</p>
-              <p className="mt-0.5 text-xs text-zinc-600">{unit}</p>
+              <p className="mt-0.5 text-xs text-kdd-dim">{unit}</p>
               <div className="mt-2">
                 <RiskBadge value={+value} thresholds={thresh} />
               </div>
@@ -103,7 +142,7 @@ export function LiveTelemetryPage() {
       )}
 
       <div className="panel">
-        <h2 className="mb-4 text-sm font-semibold text-zinc-400">
+        <h2 className="mb-4 text-sm font-semibold text-kdd-muted">
           Speed · TPS · Spin (×1000) · Brake — last {MAX_HISTORY} samples
         </h2>
         <ResponsiveContainer width="100%" height={240}>
@@ -126,15 +165,15 @@ export function LiveTelemetryPage() {
       {latest && (
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="panel">
-            <h3 className="text-sm font-semibold text-zinc-400">Corner Phase</h3>
+            <h3 className="text-sm font-semibold text-kdd-muted">Corner Phase</h3>
             <div className="mt-3 flex gap-2">
               {["braking", "apex", "drive"].map((p) => (
                 <span
                   key={p}
-                  className={`flex-1 rounded-lg py-2 text-center text-sm font-medium capitalize transition-colors ${
+                  className={`flex-1 rounded-kdd-sm py-2 text-center text-sm font-medium capitalize transition-colors ${
                     latest.phase === p
-                      ? "bg-red-600 text-white"
-                      : "bg-zinc-900 text-zinc-500"
+                      ? "bg-kdd-accent text-white"
+                      : "bg-kdd-surface text-kdd-dim"
                   }`}
                 >
                   {p}
@@ -143,14 +182,14 @@ export function LiveTelemetryPage() {
             </div>
           </div>
           <div className="panel">
-            <h3 className="text-sm font-semibold text-zinc-400">Physics Loss</h3>
+            <h3 className="text-sm font-semibold text-kdd-muted">Physics Loss</h3>
             <p className="mt-2 text-4xl font-bold">{latest.physics_loss?.toFixed(4)}</p>
-            <p className="mt-1 text-xs text-zinc-500">data + physics + boundary residual</p>
+            <p className="mt-1 text-xs text-kdd-dim">data + physics + boundary residual</p>
           </div>
           <div className="panel">
-            <h3 className="text-sm font-semibold text-zinc-400">IMU Drift</h3>
+            <h3 className="text-sm font-semibold text-kdd-muted">IMU Drift</h3>
             <p className="mt-2 text-4xl font-bold">{latest.imu_drift?.toFixed(3)}</p>
-            <p className="mt-1 text-xs text-zinc-500">UKF-M corrected bias</p>
+            <p className="mt-1 text-xs text-kdd-dim">UKF-M corrected bias</p>
           </div>
         </div>
       )}

@@ -18,17 +18,17 @@ export function StatusBar() {
   }, []);
 
   return (
-    <footer className="flex items-center justify-between border-t border-zinc-800/60 bg-zinc-950 px-6 py-1.5">
+    <footer className="flex items-center justify-between border-t border-kdd-border bg-kdd-bg px-6 py-1.5">
       <div className="flex items-center gap-4">
         {services.map((svc) => (
           <div key={svc.name} className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            <span className="text-[11px] text-zinc-500">{svc.label}</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-kdd-green" />
+            <span className="text-[11px] font-kdd-mono text-kdd-dim">{svc.label}</span>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center gap-3 text-[11px] text-zinc-600">
+      <div className="flex items-center gap-3 text-[11px] font-kdd-mono text-kdd-dim">
         <span>latency {latency} ms p95</span>
         <span>mock mode active</span>
       </div>

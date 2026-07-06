@@ -1,10 +1,12 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
 import { setAuthToken } from "./api/client";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { RaceSessionProvider } from "./context/RaceSessionContext";
 import "./index.css";
+import "./styles/kdd-tokens.css";
 
 function bootstrapAuthTokenFromUrl() {
   if (typeof window === "undefined") return;
@@ -22,10 +24,12 @@ function bootstrapAuthTokenFromUrl() {
 
 bootstrapAuthTokenFromUrl();
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
     <ErrorBoundary>
-      <RouterProvider router={router} />
+      <RaceSessionProvider>
+        <RouterProvider router={router} />
+      </RaceSessionProvider>
     </ErrorBoundary>
-  </React.StrictMode>
+  </StrictMode>
 );

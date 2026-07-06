@@ -3,6 +3,7 @@ primary_region = "fra"
 
 [env]
   RACE_AI_COPILOT_URL = "https://kdd-rjz-copilot.fly.dev"
+  VITE_RACE_AI_COPILOT_URL = "https://kdd-rjz-copilot.fly.dev"
 
 [build]
   dockerfile = "Dockerfile"

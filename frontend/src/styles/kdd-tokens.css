@@ -1,0 +1,147 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   KDD Design Tokens — Pit Wall OS
+   Canonical source: 13-ui-command-center/src/styles/global.css
+   Phase 1 — Visual Unification (13 → 15)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Fonts (self-hosted via @fontsource) ────────────────────────────────── */
+@import "@fontsource/barlow-condensed";
+@import "@fontsource/rajdhani";
+@import "@fontsource/jetbrains-mono";
+@import "@fontsource/inter";
+
+/* ── Custom Properties ──────────────────────────────────────────────────── */
+:root {
+  color-scheme: dark;
+
+  /* ── Backgrounds (Surface Ladder) */
+  --kdd-bg:             #0B0D12;
+  --kdd-surface:        #111318;
+  --kdd-card:           #181C24;
+  --kdd-hover:          #1E2330;
+  --kdd-surface-raised: #1A1F2E;
+  --kdd-surface-overlay:#1E2436;
+  --kdd-surface-popover:#242B3E;
+  --kdd-overlay:        #252A36;
+
+  /* ── Borders */
+  --kdd-border:         rgba(255, 255, 255, 0.10);
+  --kdd-border-mid:     rgba(255, 255, 255, 0.12);
+  --kdd-border-bright:  rgba(255, 255, 255, 0.20);
+
+  /* ── Discrete alpha surfaces */
+  --kdd-surface-faint:  rgba(255, 255, 255, 0.04);
+  --kdd-surface-soft:   rgba(255, 255, 255, 0.06);
+  --kdd-surface-strong: rgba(255, 255, 255, 0.08);
+
+  /* ── Text */
+  --kdd-text:           #E6EAF4;
+  --kdd-muted:          #8B92A8;
+  --kdd-dim:            #5A6180;
+
+  /* ── Accent / Signal Red */
+  --kdd-accent:         #E03737;
+  --kdd-accent-dim:     rgba(224, 55, 55, 0.12);
+  --kdd-accent-glow:    rgba(224, 55, 55, 0.20);
+  --kdd-accent-hover:   #cc3030;
+  --kdd-accent-active:  #b82a2a;
+
+  /* ── Semantic colors */
+  --kdd-green:          #22C55E;
+  --kdd-green-dim:      rgba(34, 197, 94, 0.10);
+  --kdd-green-border:   rgba(34, 197, 94, 0.20);
+  --kdd-yellow:         #F59E0B;
+  --kdd-yellow-dim:     rgba(245, 158, 11, 0.10);
+  --kdd-yellow-border:  rgba(245, 158, 11, 0.20);
+  --kdd-blue:           #3B82F6;
+  --kdd-blue-dim:       rgba(59, 130, 246, 0.10);
+  --kdd-blue-border:    rgba(59, 130, 246, 0.20);
+  --kdd-orange:         #F97316;
+  --kdd-orange-dim:     rgba(249, 115, 22, 0.10);
+  --kdd-orange-border:  rgba(249, 115, 22, 0.20);
+  --kdd-purple:         #A855F7;
+  --kdd-purple-dim:     rgba(168, 85, 247, 0.10);
+  --kdd-purple-border:  rgba(168, 85, 247, 0.20);
+  --kdd-cyan:           #00B7FF;
+  --kdd-cyan-dim:       rgba(0, 183, 255, 0.10);
+  --kdd-cyan-border:    rgba(0, 183, 255, 0.20);
+
+  /* ── Extended cockpit palette */
+  --kdd-violet:         #8B5CF6;
+  --kdd-thermal:        #FF6A00;
+  --kdd-grip:           #00E676;
+
+  /* ── Typography */
+  --kdd-font-sans:      'Barlow Condensed', 'Rajdhani', system-ui, sans-serif;
+  --kdd-font-mono:      'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --kdd-font-inter:     'Inter', system-ui, sans-serif;
+
+  /* ── Border radius */
+  --kdd-radius-sm:      4px;
+  --kdd-radius-md:      6px;
+  --kdd-radius-lg:      8px;
+  --kdd-radius-xl:      12px;
+  --kdd-radius-pill:    99px;
+
+  /* ── Shadows */
+  --kdd-shadow-sm:      0 2px 8px rgba(0, 0, 0, 0.30);
+  --kdd-shadow:         0 4px 24px rgba(0, 0, 0, 0.45);
+  --kdd-shadow-lg:      0 8px 48px rgba(0, 0, 0, 0.65);
+  --kdd-shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.55),
+                           0 0 0 1px rgba(255, 255, 255, 0.06);
+
+  /* ── Easing */
+  --kdd-ease-out:       cubic-bezier(0.23, 1, 0.32, 1);
+  --kdd-ease-in-out:    cubic-bezier(0.77, 0, 0.175, 1);
+  --kdd-ease-ui:        cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Duration */
+  --kdd-dur-fast:       120ms;
+  --kdd-dur-base:       180ms;
+  --kdd-dur-slow:       280ms;
+
+  /* ── Layout */
+  --kdd-sidebar-w:      220px;
+  --kdd-header-h:       56px;
+}
+
+/* ── Base element styles ────────────────────────────────────────────────── */
+html {
+  font-family: var(--kdd-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular numerals on all data elements for layout stability */
+table,
+.tabular-nums,
+[class*="metric"],
+[class*="stat"],
+[class*="telem"],
+[class*="mono"] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus-visible: Telemetry Cyan ring (per KDD design system v2) */
+:focus-visible {
+  outline: 2px solid var(--kdd-cyan);
+  outline-offset: 2px;
+}
+
+/* Selection style */
+::selection {
+  background: color-mix(in srgb, var(--kdd-accent) 35%, transparent);
+  color: #fff;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

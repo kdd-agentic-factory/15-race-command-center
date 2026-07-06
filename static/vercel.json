@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/((?!assets/|status\\.json|favicon\\.svg|circuits/|mock/).*)", "destination": "/index.html" }
+  ]
+}

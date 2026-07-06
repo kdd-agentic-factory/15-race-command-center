@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useRaceSession } from "../hooks/useRaceSession";
+import {
+  sessionBadgeLabel,
+  getDegradationMessages,
+  SESSION_BADGE_CLASSES,
+} from "../lib/session-badge";
 
 type TireState = "normal" | "watch" | "degrading" | "critical" | "collapse_predicted";
 
@@ -20,6 +26,7 @@ const stateColors: Record<TireState, string> = {
 };
 
 export function TireDegradationPage() {
+  const { session, hasPersistedSession } = useRaceSession();
   const [history, setHistory] = useState<{ i: number; temp: number; spin: number }[]>([]);
   const tickRef = useRef(0);
 
@@ -41,48 +48,71 @@ export function TireDegradationPage() {
   const tireState: TireState = latest ? getTireState(latest.temp, latest.spin) : "normal";
   const riskPct = latest ? Math.min(96, Math.round(58 + latest.spin * 320 + (latest.temp - 105) * 1.8)) : 0;
 
+  const badgeLabel = sessionBadgeLabel(session, hasPersistedSession);
+  const degradationMessages = getDegradationMessages(
+    session.telemetryStatus,
+    session.circuitConfidence,
+    session.dataSource,
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="bg-kdd-bg text-kdd-text space-y-6">
       <header>
-        <p className="eyebrow">Tire Degradation</p>
+        <div className="flex items-center gap-3">
+          <p className="eyebrow">Tyre / Grip</p>
+          <span className={SESSION_BADGE_CLASSES}>{badgeLabel}</span>
+        </div>
         <h1 className="mt-2 text-3xl font-semibold">Carcass thermal & spin analysis</h1>
-        <p className="mt-2 text-zinc-400">
-          Real-time degradation state · Collapse prediction · TCS activity
+        <p className="mt-2 text-kdd-muted">
+          {session.circuitName} · {session.mode.toUpperCase()} · Real-time degradation state · Collapse prediction · TCS activity
         </p>
       </header>
 
+      {degradationMessages.length > 0 && (
+        <div className="space-y-2">
+          {degradationMessages.map((msg) => (
+            <div
+              key={msg}
+              className="rounded-kdd-md border border-kdd-yellow/40 bg-kdd-yellow-dim px-4 py-2 text-sm text-kdd-yellow"
+            >
+              {msg}
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="panel">
-          <p className="text-sm text-zinc-500">Tire State</p>
+          <p className="text-sm text-kdd-dim">Tire State</p>
           <p className="mt-2 text-2xl font-bold capitalize">{tireState.replace("_", " ")}</p>
           <div className="mt-2">
             <span className={stateColors[tireState]}>{tireState}</span>
           </div>
         </div>
         <div className="panel">
-          <p className="text-sm text-zinc-500">Carcass Temp</p>
+          <p className="text-sm text-kdd-dim">Carcass Temp</p>
           <p className="mt-2 text-3xl font-bold">{latest?.temp.toFixed(1) ?? "--"} °C</p>
-          <p className="mt-1 text-xs text-zinc-500">baseline 103 °C</p>
+          <p className="mt-1 text-xs text-kdd-dim">baseline 103 °C</p>
         </div>
         <div className="panel">
-          <p className="text-sm text-zinc-500">Spin Ratio</p>
+          <p className="text-sm text-kdd-dim">Spin Ratio</p>
           <p className="mt-2 text-3xl font-bold">{latest?.spin.toFixed(4) ?? "--"}</p>
-          <p className="mt-1 text-xs text-zinc-500">threshold 0.060</p>
+          <p className="mt-1 text-xs text-kdd-dim">threshold 0.060</p>
         </div>
       </div>
 
       <div className="panel">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-400">Collapse Risk</h2>
-          <span className="font-mono text-2xl font-bold text-red-400">{riskPct}%</span>
+          <h2 className="text-sm font-semibold text-kdd-muted">Collapse Risk</h2>
+          <span className="font-kdd-mono text-2xl font-bold text-kdd-accent">{riskPct}%</span>
         </div>
-        <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-800">
+        <div className="h-3 w-full overflow-hidden rounded-full bg-kdd-surface">
           <div
             className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 transition-all"
             style={{ width: `${riskPct}%` }}
           />
         </div>
-        <p className="mt-2 text-sm text-zinc-400">
+        <p className="mt-2 text-sm text-kdd-muted">
           {riskPct > 78
             ? "Critical: Switch to Engine Map 2, reduce torque at T05/T08/T13."
             : riskPct > 58
@@ -93,7 +123,7 @@ export function TireDegradationPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="panel">
-          <h2 className="mb-4 text-sm font-semibold text-zinc-400">Carcass Temperature</h2>
+          <h2 className="mb-4 text-sm font-semibold text-kdd-muted">Carcass Temperature</h2>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={history}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -105,7 +135,7 @@ export function TireDegradationPage() {
           </ResponsiveContainer>
         </div>
         <div className="panel">
-          <h2 className="mb-4 text-sm font-semibold text-zinc-400">Spin Ratio</h2>
+          <h2 className="mb-4 text-sm font-semibold text-kdd-muted">Spin Ratio</h2>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={history}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
