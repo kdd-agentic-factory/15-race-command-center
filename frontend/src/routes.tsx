@@ -1,6 +1,10 @@
-import { createBrowserRouter } from "react-router-dom";
+﻿import { createBrowserRouter } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ModulePlaceholderPage } from "./components/ModulePlaceholderPage";
+import { RACE_MODULES } from "./config/raceCommandModules";
+
+// ── Real page imports ──
 import { PlatformOverviewPage } from "./pages/PlatformOverviewPage";
 import { LiveTelemetryPage } from "./pages/LiveTelemetryPage";
 import { CircuitIntelligencePage } from "./pages/CircuitIntelligencePage";
@@ -17,11 +21,66 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { CockpitPage } from "./pages/CockpitPage";
 import { SessionLaunchPage } from "./pages/SessionLaunchPage";
 
+// ── Route map: module-id → component ──
+// Implemented modules get their real page; everything else falls through to ModulePlaceholderPage.
+const PAGE_BY_ID: Record<string, React.ComponentType> = {
+  overview:        PlatformOverviewPage,
+  "track-live":    ModulePlaceholderPage,
+  cockpit:         CockpitPage,
+  telemetry:       LiveTelemetryPage,
+  circuit:         CircuitIntelligencePage,
+  setup:           SetupManagementPage,
+  "digital-twin":  DigitalTwinPage,
+  "lap-replay":    ModulePlaceholderPage,
+  "session-report": ReportsPage,
+  copilot:         AICopilotPage,
+  platform:        ModulePlaceholderPage,
+  "autonomous-engineer": ModulePlaceholderPage,
+  settings:        SettingsPage,
+  "edge-hub":      ModulePlaceholderPage,
+  "data-lakehouse": ModulePlaceholderPage,
+  "developer-hub": ModulePlaceholderPage,
+  "data-trust":    ModulePlaceholderPage,
+  "connect-data":  ModulePlaceholderPage,
+  "race-control":  ModulePlaceholderPage,
+  "pit-radio":     ModulePlaceholderPage,
+  "team-workspace": ModulePlaceholderPage,
+  "visualization-os": ModulePlaceholderPage,
+  "human-performance": ModulePlaceholderPage,
+  "oracle-pit-wall": ModulePlaceholderPage,
+  "black-box":     ModulePlaceholderPage,
+  "riding-style":  ModulePlaceholderPage,
+  "engineering-control": ModulePlaceholderPage,
+  electronics:     ModulePlaceholderPage,
+  aerodynamics:    ModulePlaceholderPage,
+  "fuel-energy":   ModulePlaceholderPage,
+  "chassis-geometry": ModulePlaceholderPage,
+  gearing:         ModulePlaceholderPage,
+  "setup-lab":     ModulePlaceholderPage,
+  "brake-thermal": ModulePlaceholderPage,
+  "bike-comparison": ModulePlaceholderPage,
+  parts:           PartsDesignPage,
+  tires:           TireDegradationPage,
+  "track-evolution": ModulePlaceholderPage,
+  "track-surface": ModulePlaceholderPage,
+  "event-engine":  ModulePlaceholderPage,
+  "circuit-history": ModulePlaceholderPage,
+  "data-cube":     ModulePlaceholderPage,
+  championship:    ModulePlaceholderPage,
+  "qualifying-lab": ModulePlaceholderPage,
+  "rival-radar":   ModulePlaceholderPage,
+  strategy:        RaceStrategyPage,
+  "pre-gp":        PreGrandPrixPage,
+  "crew-chief":    CrewChiefBoardPage,
+  "session-launch": SessionLaunchPage,
+  "ai-copilot":    AICopilotPage,
+};
+
 /**
- * Preview routes that must render WITHOUT auth for demo/preview use.
- * Matches exactly the routes exposed by 13-ui-command-center serviceRegistry.
+ * Routes exposed as public preview by 13-ui-command-center serviceRegistry.
+ * These render WITHOUT auth.
  */
-export const PREVIEW_PUBLIC_ROUTES = [
+const PUBLIC_ROUTES = new Set([
   "launch",
   "pitwall",
   "telemetry",
@@ -36,7 +95,7 @@ export const PREVIEW_PUBLIC_ROUTES = [
   "ai-copilot",
   "digital-twin",
   "reports",
-] as const;
+]);
 
 export const router = createBrowserRouter(
   [
@@ -44,30 +103,28 @@ export const router = createBrowserRouter(
       path: "/",
       element: <AppShell />,
       children: [
-        // Public preview routes — no auth required for demo/preview.
-        // Opened from 13 ModuleGateway before 15 has standalone auth.
-        { path: "launch", element: <SessionLaunchPage /> },
-        { path: "pitwall", element: <CockpitPage /> },
-        { path: "telemetry", element: <LiveTelemetryPage /> },
-        { path: "circuit", element: <CircuitIntelligencePage /> },
-        { path: "tires", element: <TireDegradationPage /> },
-        { path: "setup", element: <SetupManagementPage /> },
-        { path: "parts", element: <PartsDesignPage /> },
-        { path: "pre-gp", element: <PreGrandPrixPage /> },
-        { path: "crew-chief", element: <CrewChiefBoardPage /> },
-        { path: "strategy", element: <RaceStrategyPage /> },
-        { path: "copilot", element: <AICopilotPage /> },
-        { path: "ai-copilot", element: <AICopilotPage /> },
-        { path: "digital-twin", element: <DigitalTwinPage /> },
-        { path: "reports", element: <ReportsPage /> },
-        // Protected routes — require auth token
+        // ── Public preview routes (no auth) ──
+        ...RACE_MODULES
+          .filter((m) => PUBLIC_ROUTES.has(m.id))
+          .map((m) => {
+            const Component = PAGE_BY_ID[m.id] ?? ModulePlaceholderPage;
+            return { path: m.route.replace("/", ""), element: <Component /> };
+          }),
+
+        // ── Protected routes (auth required) ──
         {
           element: <ProtectedRoute />,
           children: [
             { index: true, element: <PlatformOverviewPage /> },
-            { path: "settings", element: <SettingsPage /> },
+            ...RACE_MODULES
+              .filter((m) => !PUBLIC_ROUTES.has(m.id))
+              .map((m) => {
+                const Component = PAGE_BY_ID[m.id] ?? ModulePlaceholderPage;
+                return { path: m.route.replace("/", ""), element: <Component /> };
+              }),
           ],
         },
+
         // 404 catch-all
         { path: "*", element: <div className="p-8 text-center font-kdd-mono text-kdd-dim">Page not found</div> },
       ],
