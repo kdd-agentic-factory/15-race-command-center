@@ -73,5 +73,5 @@ export const router = createBrowserRouter(
       ],
     },
   ],
-  { basename: "/command-center" }
+  { basename: "/" }
 );
