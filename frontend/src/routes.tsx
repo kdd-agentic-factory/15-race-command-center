@@ -51,20 +51,31 @@ import { GearingPage } from "./pages/GearingPage";
 import { SetupLabPage } from "./pages/SetupLabPage";
 import { BikeComparisonPage } from "./pages/BikeComparisonPage";
 
+// ─── Phase 18.6 — Smart Circuits / circuit intelligence pages ───
+import { TrackEvolutionPage } from "./pages/TrackEvolutionPage";
+import { TrackSurfacePage } from "./pages/TrackSurfacePage";
+import { EventEnginePage } from "./pages/EventEnginePage";
+import { CircuitHistoryPage } from "./pages/CircuitHistoryPage";
+import { DataCubePage } from "./pages/DataCubePage";
+import { ChampionshipPage } from "./pages/ChampionshipPage";
+import { TrackLivePage } from "./pages/TrackLivePage";
+import { LapReplayPage } from "./pages/LapReplayPage";
+import { PlatformPage } from "./pages/PlatformPage";
+
 // ─── Route map: module-id → component ───
 // Implemented modules get their real page; everything else falls through to ModulePlaceholderPage.
 const PAGE_BY_ID: Record<string, React.ComponentType> = {
   overview:        PlatformOverviewPage,
-  "track-live":    ModulePlaceholderPage,
+  "track-live":    TrackLivePage,
   cockpit:         CockpitPage,
   telemetry:       LiveTelemetryPage,
   circuit:         CircuitIntelligencePage,
   setup:           SetupManagementPage,
   "digital-twin":  DigitalTwinPage,
-  "lap-replay":    ModulePlaceholderPage,
+  "lap-replay":    LapReplayPage,
   "session-report": ReportsPage,
   copilot:         AICopilotPage,
-  platform:        ModulePlaceholderPage,
+  platform:        PlatformPage,
   "autonomous-engineer": AutonomousEngineerPage,
   settings:        SettingsPage,
   "edge-hub":      TracksideEdgeHubPage,
@@ -91,14 +102,14 @@ const PAGE_BY_ID: Record<string, React.ComponentType> = {
   "bike-comparison": BikeComparisonPage,
   parts:           PartsDesignPage,
   tires:           TireDegradationPage,
-  "track-evolution": ModulePlaceholderPage,
-  "track-surface": ModulePlaceholderPage,
-  "event-engine":  ModulePlaceholderPage,
-  "circuit-history": ModulePlaceholderPage,
-  "data-cube":     ModulePlaceholderPage,
-  championship:    ModulePlaceholderPage,
-  "qualifying-lab": ModulePlaceholderPage,
-  "rival-radar":   ModulePlaceholderPage,
+  "track-evolution": TrackEvolutionPage,
+  "track-surface": TrackSurfacePage,
+  "event-engine":  EventEnginePage,
+  "circuit-history": CircuitHistoryPage,
+  "data-cube":     DataCubePage,
+  championship:    ChampionshipPage,
+  "qualifying-lab": QualifyingLabPage,
+  "rival-radar":   RivalRadarPage,
   strategy:        RaceStrategyPage,
   "pre-gp":        PreGrandPrixPage,
   "crew-chief":    CrewChiefBoardPage,
