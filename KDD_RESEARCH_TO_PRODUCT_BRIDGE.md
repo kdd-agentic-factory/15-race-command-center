@@ -1,7 +1,7 @@
 # Research-to-Product Bridge — Lightweighting Lab Integration
 
 > **Phase**: 18.9  
-> **Status**: ✅ Implemented  
+> **Status**: ✅ Implemented on Fly / ⚠️ InsForge deploy verification pending  
 > **Date**: July 2026  
 > **Paper**: "Structural optimization principles for edge AI in motorsport telemetry"  
 > **DOI**: 10.1038/s41598-026-49736-0
@@ -147,10 +147,42 @@ ResearchBridgeCard.tsx (UI component — amber card with CTA link)
 
 ## Verification
 
-- [ ] 8 engineering modules show Research Bridge Card
-- [ ] Card links to `https://ep3nru4k.insforge.site/lightweighting-lab/`
-- [ ] Copilot shows lightweighting prompts in Decision Loop + Mission Builder
-- [ ] Gateway 13 Settings > Pillars shows Lightweighting Lab
-- [ ] Lightweighting Lab URL returns 200
-- [ ] RCC builds with no errors
-- [ ] Gateway 13 builds with no errors
+- [x] 8 engineering modules show Research Bridge Card
+- [x] Card links to `https://ep3nru4k.insforge.site/lightweighting-lab/`
+- [x] Copilot shows lightweighting prompts in Decision Loop + Mission Builder
+- [x] Gateway 13 Settings > Pillars shows Lightweighting Lab
+- [x] Lightweighting Lab URL returns 200
+- [x] RCC builds with no errors
+- [x] Gateway 13 builds with no errors
+- [x] RCC Fly deploy verified
+- [x] Gateway 13 Fly deploy verified
+- [x] HTTP smoke test passed: 14/14
+- [ ] RCC InsForge deploy verification pending
+- [ ] Gateway 13 InsForge deploy verification pending
+
+---
+
+## Closure Note
+
+Phase 18.9 is closed functionally and on Fly deployments. The only remaining closure item is InsForge deployment verification for RCC and Gateway 13 once the InsForge CLI is available in the environment.
+
+Pending InsForge checks:
+
+### RCC / 15
+
+Validate the InsForge deployment routes:
+
+- `/engineering-control`
+- `/brake-thermal`
+- `/setup-lab`
+- `/chassis-geometry`
+- `/parts`
+- `/copilot`
+
+### Gateway / 13
+
+Validate:
+
+- Settings → Pillars → SpecForge → Lightweighting Lab
+
+Unicode note: the `K↔H` content check can accept equivalent variants such as `K <-> H`, `K-H`, `K to H`, or references to stiffness matrix / Hessian mapping.
