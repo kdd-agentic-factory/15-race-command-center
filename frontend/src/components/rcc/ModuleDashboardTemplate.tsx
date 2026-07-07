@@ -5,7 +5,9 @@ import { DecisionCard } from "./DecisionCard";
 import { EvidenceList } from "./EvidenceList";
 import { RiskConfidenceBar } from "./RiskConfidenceBar";
 import { StatusPill } from "./StatusPill";
+import { ResearchBridgeCard } from "./ResearchBridgeCard";
 import { moduleByRoute } from "../../config/raceCommandModules";
+import { ENGINEERING_MODULES_WITH_BRIDGE } from "../../data/rcc-research-bridge-data";
 import type { ModuleDemoData } from "../../data/rcc-module-demo-data";
 
 interface ModuleDashboardTemplateProps {
@@ -109,6 +111,11 @@ export function ModuleDashboardTemplate({ data }: ModuleDashboardTemplateProps) 
           ))}
         </div>
       </div>
+
+      {/* Research-to-Product Bridge (shown for engineering modules) */}
+      {mod && (ENGINEERING_MODULES_WITH_BRIDGE as readonly string[]).includes(mod.id) && (
+        <ResearchBridgeCard />
+      )}
 
       {/* Back nav */}
       <div className="flex gap-3">

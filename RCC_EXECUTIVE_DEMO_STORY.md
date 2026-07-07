@@ -1,9 +1,9 @@
 # RCC Executive Demo Story — KDD Ecosystem Walkthrough
 
-> **Version**: 1.0  
+> **Version**: 1.1  
 > **Date**: July 2026  
 > **Audience**: Executives, partners, technical leads  
-> **Duration**: ~20 minutes  
+> **Duration**: ~25 minutes  
 > **Format**: Live browser walkthrough across KDD Hub, Race Command Center, and SpecForge AI
 
 ---
@@ -36,13 +36,14 @@ Demonstrate how KDD closes the loop from **real-time track data → race decisio
 | KDD Hub | `https://kdd-rjz-ui.fly.dev/` | ✅ verified |
 | RCC | `https://kdd-rjz-race.fly.dev/` | ✅ verified |
 | SpecForge AI | `https://ep3nru4k.insforge.site/` | ✅ verified |
+| Lightweighting Lab | `https://ep3nru4k.insforge.site/lightweighting-lab/` | ✅ verified |
 
 ---
 
 ## Demo Prerequisites
 
 - [ ] Laptop with Chrome/Edge (latest) — full screen, 1920×1080 minimum
-- [ ] All 3 tabs pre-loaded (Hub, RCC, SpecForge) to avoid loading delays
+- [ ] All 4 tabs pre-loaded (Hub, RCC, SpecForge, Lightweighting Lab) to avoid loading delays
 - [ ] RCC preview mode enabled (no auth required — VITE_RCC_PREVIEW_MODE=true)
 - [ ] Stable internet connection (no VPN that interferes with Fly.io/InsForge)
 - [ ] Presenter notes printed or on second monitor
@@ -50,7 +51,7 @@ Demonstrate how KDD closes the loop from **real-time track data → race decisio
 
 ---
 
-## 8-Step Walkthrough
+## 9-Step Walkthrough
 
 ---
 
@@ -211,11 +212,36 @@ Demonstrate how KDD closes the loop from **real-time track data → race decisio
 4. Documentation generator — auto-generated engineering report
 5. Integration back to RCC — how a part designed in SpecForge appears in Parts Design module
 
-**Key Detail**: SpecForge is not a separate tool — it's connected to the RCC evidence pipeline. A setup recommendation from Engineering Control can become a SpecForge optimization project in one click.
+**Key Detail**: SpecForge is not a separate tool — it's connected to the RCC evidence pipeline. A setup recommendation from Engineering Control can become a SpecForge optimization project in one click. The Lightweighting Lab (Step 7B) is the research bridge feeding scientific validation into these design decisions.
 
 **Expected Outcome**: The audience understands the end-to-end loop: on-track data → decision → engineered component.
 
 **Fallback**: SpecForge is an independent deployment. If it's unavailable, show screenshots or navigate to the Parts Design module in RCC to explain the integration point.
+
+---
+
+### Step 7B: Research-to-Product Bridge — The Lightweighting Lab
+
+**URL**: `https://ep3nru4k.insforge.site/lightweighting-lab/`
+
+**Talk Track**:
+
+> "Every engineering decision in RCC is grounded in research. The Lightweighting Lab translates structural optimization and edge-AI compression science into the operational metrics our engineers use — mass targets, confidence intervals, feasibility scores. It's not a dashboard of papers — it's a live bridge from science to the pit wall."
+
+**What to Show**:
+
+1. **Lightweighting Lab landing** — Research-backed optimization overview: paper citation (Scientific Reports 2026), structural (K↔H, BESO) and digital (GPTQ/AWQ, INT4) optimization concepts
+2. **Bridge Map** — How research concepts map to engineering modules in RCC (material reduction → Parts Design, compression → Edge Hub, sensitivity → Setup decisions)
+3. **Metric Formula Cards** — BESO sensitivity, GPTQ compression ratio, FoSdig (factor of safety digital), IPW (intelligence-per-watt) — the exact metrics that appear in RCC engineering modules
+4. **Operating Point Card** — 32B INT4 example: 61→18 GB, 26→69.9 tok/s, 295→165 W — showing the practical impact of digital lightweighting
+5. **(Optional) Return to SpecForge** — Open the Design Studio to show how a lightweighted component flows into CAD optimization
+6. **Return to RCC** — Navigate back to any Engineering module and point out the **Research Bridge Card** at the top: "See — the K↔H formula for that upright decision is right here."
+
+**Key Detail**: This is NOT a research paper viewer — it's a decision bridge. Every concept on this page feeds a real-time metric inside RCC engineering modules. Engineers don't leave their workflow to read a paper; the research is already inside their decision card.
+
+**Expected Outcome**: The audience understands that KDD is scientifically grounded. Research is not a separate activity — it's embedded in the engineering workflow.
+
+**Fallback**: If the Lightweighting Lab is unavailable, show the Research Bridge Card inside any RCC Engineering module (it links there) and explain the architecture.
 
 ---
 
@@ -251,8 +277,9 @@ Demonstrate how KDD closes the loop from **real-time track data → race decisio
 | 5 | Pit Wall | `/oracle-pit-wall`, `/race-control`, `/rival-radar`, `/championship` | 3 min |
 | 6 | AI Copilot | `/copilot` | 2 min |
 | 7 | SpecForge | SpecForge landing + studio | 3 min |
+| 7B | Research Bridge | Lightweighting Lab + RCC Research Bridge Card | 3 min |
 | 8 | Closing | Recap | 1 min |
-| | **Total** | | **~22 min** |
+| | **Total** | | **~25 min** |
 
 ---
 
@@ -263,9 +290,10 @@ Demonstrate how KDD closes the loop from **real-time track data → race decisio
 | Any RCC module returns 404 | All 34 modules are mapped — if one fails, it's a deployment glitch. Open another module from the same section and continue. |
 | Auth screen appears | Preview mode may have dropped. Check `VITE_RCC_PREVIEW_MODE=true` in Docker build args. If blocked, explain "auth is disabled for demo — in production this integrates with SSO." |
 | SpecForge AI down | Skip to Step 8. Explain the integration architecture from the Parts Design module in RCC. |
+| Lightweighting Lab down | Skip Step 7B. Show the Research Bridge Card inside any RCC Engineering module instead — the link is built into the workflow. |
 | Copilot API timeout | Copilot response may take 5-10s on first query. If it fails, show the page architecture and explain the pipeline with a pre-recorded answer. |
 | Slow page transitions | All RCC pages are client-side rendered React SPA — transitions are instant after initial load. Pre-warm tabs before demo. |
-| Fly.io cold start | Fly.io may have cold start latency (~2s) if idle. Open all 3 tabs 30s before demo starts. |
+| Fly.io cold start | Fly.io may have cold start latency (~2s) if idle. Open all 4 tabs 30s before demo starts. |
 
 ---
 

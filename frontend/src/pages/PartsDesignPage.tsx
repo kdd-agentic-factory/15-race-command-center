@@ -3,6 +3,7 @@ import {
   askBlueprintDesignBrief,
   type BlueprintPartContext,
 } from "../api/copilot";
+import { ResearchBridgeCard } from "../components/rcc/ResearchBridgeCard";
 import { type PartStatus, type RiskLevel } from "../types/part";
 
 const LIFECYCLE: PartStatus[] = [
@@ -275,15 +276,18 @@ export function PartsDesignPage() {
   };
 
   return (
-    <PartsDesignPageView
-      parts={parts}
-      selectedPart={selectedPart}
-      onSelectPart={(part) => {
-        setSelectedPart(part);
-        setBlueprintState({ status: "idle" });
-      }}
-      blueprintState={blueprintState}
-      onGenerateBlueprint={handleGenerateBlueprint}
-    />
+    <div className="space-y-6">
+      <PartsDesignPageView
+        parts={parts}
+        selectedPart={selectedPart}
+        onSelectPart={(part) => {
+          setSelectedPart(part);
+          setBlueprintState({ status: "idle" });
+        }}
+        blueprintState={blueprintState}
+        onGenerateBlueprint={handleGenerateBlueprint}
+      />
+      <ResearchBridgeCard />
+    </div>
   );
 }

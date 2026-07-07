@@ -13,10 +13,11 @@
 - [ ] Full-screen mode (F11) at 1920×1080 or larger
 - [ ] Disable all extensions that modify page content (adblockers, dark mode)
 - [ ] Clear DNS cache: `ipconfig /flushdns`
-- [ ] Pre-open 3 tabs (don't refresh during demo):
+- [ ] Pre-open 4 tabs (don't refresh during demo):
   1. `https://kdd-rjz-ui.fly.dev/`
   2. `https://kdd-rjz-race.fly.dev/`
   3. `https://ep3nru4k.insforge.site/`
+  4. `https://ep3nru4k.insforge.site/lightweighting-lab/`
 
 ### Pre-Flight Smoke Test
 
@@ -42,6 +43,7 @@ Run each URL and verify 200 OK + no auth/placeholder:
 | `/copilot` | 200, real page | [ ] |
 | `/platform` | 200, real page | [ ] |
 | `https://ep3nru4k.insforge.site/` | 200, SpecForge visible | [ ] |
+| `https://ep3nru4k.insforge.site/lightweighting-lab/` | 200, Lightweighting Lab visible | [ ] |
 
 ### Route Map — All 34 Implemented Modules
 
@@ -120,6 +122,7 @@ Step 4:  Engineering      → /engineering-control → /aerodynamics → /brake-
 Step 5:  Pit Wall         → /oracle-pit-wall → /race-control → /rival-radar → /championship
 Step 6:  AI Copilot       → /copilot
 Step 7:  SpecForge        → https://ep3nru4k.insforge.site/
+Step 7B: Research Bridge  → https://ep3nru4k.insforge.site/lightweighting-lab/
 Step 8:  Closing          → recap on any page
 ```
 
@@ -139,6 +142,7 @@ For marketing, pitch decks, or documentation:
 | 8 | AI Copilot | `/copilot` | Copilot response |
 | 9 | SpecForge studio | `https://ep3nru4k.insforge.site/` | Optimization dashboard |
 | 10 | Sidebar full | `/overview` | Scrollable sidebar capture (stitch if needed) |
+| 11 | Lightweighting Lab | `https://ep3nru4k.insforge.site/lightweighting-lab/` | Bridge Map + Metric Cards |
 
 ### Known Issues
 
@@ -161,6 +165,7 @@ If a specific module fails, swap to its backup:
 | `/engineering-control` | `/electronics` |
 | `/copilot` | `/autonomous-engineer` |
 | SpecForge | `/parts` (in RCC) |
+| Lightweighting Lab | Research Bridge Card (any RCC Engineering module) |
 
 ---
 

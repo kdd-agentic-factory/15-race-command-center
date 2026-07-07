@@ -146,6 +146,7 @@ export const PROMPT_GROUPS: PromptGroup[] = [
       "Explain the current PitWall decision from telemetry to recommendation.",
       "What cause is most likely behind the rear grip delta?",
       "Which decision-loop stage needs more evidence before rider instruction?",
+      "Explain how K<->H lightweighting supports this engineering decision using FoSdig and IPW metrics.",
     ],
   },
   {
@@ -156,6 +157,7 @@ export const PROMPT_GROUPS: PromptGroup[] = [
       "Generate a validation mission for traction-control map B.",
       "Define rider instructions and success criteria for the next 3 laps.",
       "What should race engineering monitor during the mission?",
+      "Validate a lightweighting decision: compare physical mass reduction and digital model compression using the K<->H research bridge.",
     ],
   },
   {
