@@ -39,6 +39,18 @@ import { BrakeThermalPage } from "./pages/BrakeThermalPage";
 import { RivalRadarPage } from "./pages/RivalRadarPage";
 import { QualifyingLabPage } from "./pages/QualifyingLabPage";
 
+// ─── Phase 18.5 — remaining non-priority module pages ───
+import { DeveloperHubPage } from "./pages/DeveloperHubPage";
+import { ConnectDataPage } from "./pages/ConnectDataPage";
+import { PitRadioPage } from "./pages/PitRadioPage";
+import { TeamWorkspacePage } from "./pages/TeamWorkspacePage";
+import { VisualizationOSPage } from "./pages/VisualizationOSPage";
+import { BlackBoxPage } from "./pages/BlackBoxPage";
+import { RidingStylePage } from "./pages/RidingStylePage";
+import { GearingPage } from "./pages/GearingPage";
+import { SetupLabPage } from "./pages/SetupLabPage";
+import { BikeComparisonPage } from "./pages/BikeComparisonPage";
+
 // ─── Route map: module-id → component ───
 // Implemented modules get their real page; everything else falls through to ModulePlaceholderPage.
 const PAGE_BY_ID: Record<string, React.ComponentType> = {
@@ -57,26 +69,26 @@ const PAGE_BY_ID: Record<string, React.ComponentType> = {
   settings:        SettingsPage,
   "edge-hub":      TracksideEdgeHubPage,
   "data-lakehouse": DataLakehousePage,
-  "developer-hub": ModulePlaceholderPage,
+  "developer-hub": DeveloperHubPage,
   "data-trust":    DataTrustPage,
-  "connect-data":  ModulePlaceholderPage,
+  "connect-data":  ConnectDataPage,
   "race-control":  RaceControlPage,
-  "pit-radio":     ModulePlaceholderPage,
-  "team-workspace": ModulePlaceholderPage,
-  "visualization-os": ModulePlaceholderPage,
+  "pit-radio":     PitRadioPage,
+  "team-workspace": TeamWorkspacePage,
+  "visualization-os": VisualizationOSPage,
   "human-performance": HumanPerformancePage,
   "oracle-pit-wall": OraclePitWallPage,
-  "black-box":     ModulePlaceholderPage,
-  "riding-style":  ModulePlaceholderPage,
+  "black-box":     BlackBoxPage,
+  "riding-style":  RidingStylePage,
   "engineering-control": EngineeringControlPage,
   electronics:     ElectronicsPage,
   aerodynamics:    AerodynamicsPage,
   "fuel-energy":   FuelEnergyPage,
   "chassis-geometry": ChassisGeometryPage,
-  gearing:         ModulePlaceholderPage,
-  "setup-lab":     ModulePlaceholderPage,
+  gearing:         GearingPage,
+  "setup-lab":     SetupLabPage,
   "brake-thermal": BrakeThermalPage,
-  "bike-comparison": ModulePlaceholderPage,
+  "bike-comparison": BikeComparisonPage,
   parts:           PartsDesignPage,
   tires:           TireDegradationPage,
   "track-evolution": ModulePlaceholderPage,

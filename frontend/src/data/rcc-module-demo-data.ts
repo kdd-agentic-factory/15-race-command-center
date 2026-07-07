@@ -1505,3 +1505,954 @@ export function qualifyingLabData(): ModuleDemoData {
     ],
   };
 }
+
+// ---------------------------------------------------------------------------
+// 16. Developer Hub
+// ---------------------------------------------------------------------------
+
+export function developerHubData(): ModuleDemoData {
+  return {
+    moduleId: "developer-hub",
+    status: "operational",
+    summary:
+      "Internal developer portal for trackside APIs, SDKs, webhooks, and integration keys — powering the data pipeline between the garage and the command centre.",
+    metrics: [
+      {
+        label: "API Uptime",
+        value: "99.97%",
+        sub: "rolling 30 days",
+        accent: "positive",
+        trend: "stable",
+      },
+      {
+        label: "SDK Downloads",
+        value: `${rng(1.2, 4.8, 1)}k`,
+        sub: "this race weekend",
+        accent: "neutral",
+        trend: "up",
+      },
+      {
+        label: "Active Webhooks",
+        value: `${rng(12, 28, 0)}`,
+        sub: `${rng(3, 8, 0)} failing`,
+        accent: "warning",
+        trend: "stable",
+      },
+      {
+        label: "Integration Latency",
+        value: `${rng(40, 120, 0)} ms`,
+        sub: "p99 webhook delivery",
+        accent: "neutral",
+        trend: "down",
+      },
+    ],
+    decision: {
+      title: "Upgrade to WebSocket streaming for real-time telemetry?",
+      recommendation:
+        "Current REST polling adds 340 ms average latency. WebSocket streaming reduces to < 15 ms. 78 % of SDK consumers already support WS. Migration takes 2 engineering hours.",
+      impact: "–325 ms avg latency | 2 eng-hours migration | no breaking change to REST fallback",
+      confidence: 93,
+      urgency: "medium",
+      actionLabel: "Enable WebSocket",
+    },
+    evidence: [
+      {
+        label: "REST Polling Latency",
+        value: "340 ms avg",
+        source: "API Gateway monitor",
+        type: "sensor",
+      },
+      {
+        label: "WS SDK Adoption",
+        value: "78 % of consumers",
+        source: "SDK telemetry",
+        type: "model",
+      },
+      {
+        label: "Migration Effort",
+        value: "2 engineer-hours",
+        source: "Engineering estimate",
+        type: "historical",
+      },
+      {
+        label: "Webhook Failure Rate",
+        value: `${rng(1.2, 4.5, 1)} %`,
+        source: "Webhook delivery log",
+        type: "sensor",
+      },
+    ],
+    risks: [
+      { label: "WS connection dropout under load", value: `${rng(0.5, 2.0, 1)}%` },
+      { label: "Legacy REST clients break silently", value: "3.0%" },
+    ],
+    confidence: 93,
+    nextActions: [
+      {
+        label: "Enable WebSocket gateway",
+        description: "Activate WS endpoint. Keep REST as fallback for 2 weeks.",
+        cta: "Enable",
+      },
+      {
+        label: "Notify SDK consumers",
+        description: "Publish migration guide and deprecation timeline for REST endpoints.",
+        cta: "Notify",
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 17. Connect Data
+// ---------------------------------------------------------------------------
+
+export function connectDataData(): ModuleDemoData {
+  return {
+    moduleId: "connect-data",
+    status: "operational",
+    summary:
+      "External data connector management ingesting weather feeds, tyre-supplier telemetry, and competitor timing — all normalised into a single real-time stream.",
+    metrics: [
+      {
+        label: "Active Connectors",
+        value: `${rng(6, 12, 0)}`,
+        sub: `${rng(1, 3, 0)} degraded`,
+        accent: "neutral",
+        trend: "stable",
+      },
+      {
+        label: "Data Freshness",
+        value: `${rng(2, 8, 1)} s`,
+        sub: "avg source lag",
+        accent: "positive",
+        trend: "down",
+      },
+      {
+        label: "Ingest Rate",
+        value: `${rng(40, 85, 0)} Mbps`,
+        sub: "aggregate throughput",
+        accent: "neutral",
+        trend: "up",
+      },
+      {
+        label: "Source Health",
+        value: `${rng(94, 100, 1)} %`,
+        sub: "all upstream endpoints",
+        accent: "positive",
+        trend: "stable",
+      },
+    ],
+    decision: {
+      title: "Prioritise reconnection to competitor timing feed?",
+      recommendation:
+        "Competitor timing feed (#41) has been offline for 47 s — missing real-time sector deltas for 3 key rivals. Reconnect now. Fallback to historical averages is degrading tactical accuracy.",
+      impact: "47 s data gap restored | tactical accuracy returns to 98 % from 82 % fallback",
+      confidence: 96,
+      urgency: "high",
+      actionLabel: "Reconnect Feed #41",
+    },
+    evidence: [
+      {
+        label: "Feed #41 Offline Duration",
+        value: "47 s",
+        source: "Health-check monitor",
+        type: "sensor",
+      },
+      {
+        label: "Tactical Accuracy (Fallback)",
+        value: "82 %",
+        source: "Rival Radar model",
+        type: "model",
+      },
+      {
+        label: "Weather Feed Status",
+        value: "OK — 1.2 s lag",
+        source: "DTN Weather Fusion",
+        type: "external",
+      },
+      {
+        label: "Tyre-Supplier Feed Status",
+        value: "OK — 0.8 s lag",
+        source: "Michelin telemetry API",
+        type: "external",
+      },
+    ],
+    risks: [
+      { label: "Reconnect fails — feed permanently down", value: "7.0%" },
+      { label: "Weather feed degrades during reconnect attempt", value: "4.5%" },
+    ],
+    confidence: 96,
+    nextActions: [
+      {
+        label: "Reconnect competitor timing feed",
+        description: "Initiate reconnection sequence for feed #41. Auto-retry 3 times.",
+        cta: "Reconnect",
+      },
+      {
+        label: "Check feed #41 provider status",
+        description: "Contact timing provider to confirm upstream system health.",
+        cta: "Contact Provider",
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 18. Pit-Radio
+// ---------------------------------------------------------------------------
+
+export function pitRadioData(): ModuleDemoData {
+  return {
+    moduleId: "pit-radio",
+    status: "operational",
+    summary:
+      "Team communication timeline with AI-generated summaries — capturing every radio exchange between rider, crew chief, and data engineer during the session.",
+    metrics: [
+      {
+        label: "Messages This Session",
+        value: `${rng(40, 90, 0)}`,
+        sub: "14 min session",
+        accent: "neutral",
+        trend: "up",
+      },
+      {
+        label: "AI Summaries Generated",
+        value: `${rng(8, 18, 0)}`,
+        sub: "auto-categorised",
+        accent: "positive",
+        trend: "up",
+      },
+      {
+        label: "Critical Alerts",
+        value: `${rng(1, 4, 0)}`,
+        sub: "flagged for review",
+        accent: "critical",
+        trend: "stable",
+      },
+      {
+        label: "Audio Clips",
+        value: `${rng(12, 35, 0)}`,
+        sub: "synced to telemetry",
+        accent: "neutral",
+        trend: "up",
+      },
+    ],
+    decision: {
+      title: "Flag lap-6 radio message for engineering review?",
+      recommendation:
+        "Rider reported 'rear chatter under braking into T1' at lap 6, 14:32. AI sentiment analysis rates concern level 8.4/10. Recommended flag for suspension engineer review with correlated telemetry clip.",
+      impact: "Suspension engineer notified | telemetry clip T1 braking (lap 6) attached",
+      confidence: 88,
+      urgency: "high",
+      actionLabel: "Flag for Review",
+    },
+    evidence: [
+      {
+        label: "Transcript (lap 6)",
+        value: "\"Rear chatter under braking into T1 — it's getting worse every lap.\"",
+        source: "AI speech-to-text",
+        type: "comms",
+      },
+      {
+        label: "Rider Sentiment",
+        value: "8.4 / 10 concern",
+        source: "AI sentiment model",
+        type: "model",
+      },
+      {
+        label: "Rear Slip RMS (lap 6 T1)",
+        value: "9.7 %",
+        source: "Chassis accelerometer",
+        type: "sensor",
+      },
+      {
+        label: "Crew Chief Response",
+        value: "\"Copy. We'll look at the data. Try shifting brake bias rearward 2 clicks.\"",
+        source: "AI speech-to-text",
+        type: "comms",
+      },
+    ],
+    risks: [
+      { label: "False positive — chatter within normal range", value: "6.0%" },
+      { label: "Critical message buried in noise", value: "3.0%" },
+    ],
+    confidence: 88,
+    nextActions: [
+      {
+        label: "Flag for suspension engineer",
+        description: "Send lap-6 T1 telemetry clip to suspension engineer with transcript.",
+        cta: "Flag",
+      },
+      {
+        label: "Review brake bias change",
+        description: "Check if rider applied the rearward bias adjustment on lap 7.",
+        cta: "Verify",
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 19. Team Workspace
+// ---------------------------------------------------------------------------
+
+export function teamWorkspaceData(): ModuleDemoData {
+  return {
+    moduleId: "team-workspace",
+    status: "operational",
+    summary:
+      "Race-weekend collaborative workspace with shared tasks, role assignments, approval workflows, and real-time notes across the entire garage team.",
+    metrics: [
+      {
+        label: "Active Members",
+        value: `${rng(12, 18, 0)}`,
+        sub: "currently online",
+        accent: "positive",
+        trend: "stable",
+      },
+      {
+        label: "Open Tasks",
+        value: `${rng(8, 24, 0)}`,
+        sub: `${rng(3, 8, 0)} overdue`,
+        accent: "warning",
+        trend: "up",
+      },
+      {
+        label: "Pending Approvals",
+        value: `${rng(2, 6, 0)}`,
+        sub: "race-plan changes",
+        accent: "warning",
+        trend: "stable",
+      },
+      {
+        label: "Shared Docs",
+        value: `${rng(14, 30, 0)}`,
+        sub: "updated this session",
+        accent: "neutral",
+        trend: "up",
+      },
+    ],
+    decision: {
+      title: "Approve race-plan revision 4.2 or request changes?",
+      recommendation:
+        "Race-plan revision 4.2 includes updated pit-stop sequence and tyre allocation for the mixed-weather forecast. All section leads approved except chief mechanic (pending). Recommend approve — weather window tightens after lap 12.",
+      impact: "Approved plan activates immediately | tyre allocation locked 20 min before session",
+      confidence: 84,
+      urgency: "high",
+      actionLabel: "Approve Rev 4.2",
+    },
+    evidence: [
+      {
+        label: "Chief Mechanic Sign-off",
+        value: "Pending — notified",
+        source: "Approval workflow",
+        type: "external",
+      },
+      {
+        label: "Weather Window",
+        value: "Dry until lap 12, rain 70 % after",
+        source: "DTN Weather Fusion",
+        type: "external",
+      },
+      {
+        label: "Tyre Allocation Lock",
+        value: "T-20 min (14:40)",
+        source: "Race schedule",
+        type: "historical",
+      },
+      {
+        label: "Section Lead Approvals",
+        value: "4 / 5 complete",
+        source: "Workspace dashboard",
+        type: "model",
+      },
+    ],
+    risks: [
+      { label: "Chief mechanic rejects after approval", value: "8.0%" },
+      { label: "Weather forecast changes invalidating plan", value: "15.0%" },
+    ],
+    confidence: 84,
+    nextActions: [
+      {
+        label: "Approve revision 4.2",
+        description: "Confirm race-plan approval. Notify all section leads and pit crew.",
+        cta: "Approve",
+      },
+      {
+        label: "Follow up chief mechanic",
+        description: "Call chief mechanic for final verbal sign-off on pit-stop sequence.",
+        cta: "Contact",
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 20. Visualization OS
+// ---------------------------------------------------------------------------
+
+export function visualizationOSData(): ModuleDemoData {
+  return {
+    moduleId: "visualization-os",
+    status: "operational",
+    summary:
+      "Dashboard builder and track-overlay manager rendering real-time telemetry, sector maps, and custom visualisations across all command-centre displays.",
+    metrics: [
+      {
+        label: "Active Dashboards",
+        value: `${rng(4, 9, 0)}`,
+        sub: "rendered across 3 screens",
+        accent: "neutral",
+        trend: "stable",
+      },
+      {
+        label: "Overlays Rendered",
+        value: `${rng(18, 35, 0)}`,
+        sub: "telemetry + track layers",
+        accent: "neutral",
+        trend: "up",
+      },
+      {
+        label: "Data Sources",
+        value: `${rng(6, 12, 0)}`,
+        sub: "connected streams",
+        accent: "positive",
+        trend: "stable",
+      },
+      {
+        label: "Render Latency",
+        value: `${rng(8, 24, 0)} ms`,
+        sub: "frame-to-display",
+        accent: "positive",
+        trend: "down",
+      },
+    ],
+    decision: {
+      title: "Switch to 'Corner-Exit' overlay preset for next session?",
+      recommendation:
+        "Current 'Braking Zone' preset shows brake-temp and slip data. For the next practice session, switch to 'Corner-Exit' preset to focus on drive traction, rear-squat, and throttle maps. Rider specifically requested exit data after T5/T14 complaints.",
+      impact: "Overlay switch in 1.2 s | rider gets targeted corner-exit telemetry for T5/T14",
+      confidence: 91,
+      urgency: "medium",
+      actionLabel: "Switch to Corner-Exit",
+    },
+    evidence: [
+      {
+        label: "Current Preset",
+        value: "Braking Zone",
+        source: "Overlay manager",
+        type: "model",
+      },
+      {
+        label: "Rider Request",
+        value: "\"Need to see rear drive data on exit\"",
+        source: "Crew-chief radio log",
+        type: "comms",
+      },
+      {
+        label: "Corner-Exit Preset Readiness",
+        value: "Dashboard verified — all widgets responsive",
+        source: "Overlay health check",
+        type: "model",
+      },
+      {
+        label: "Switch Downtime",
+        value: "1.2 s (negligible)",
+        source: "Performance benchmark",
+        type: "historical",
+      },
+    ],
+    risks: [
+      { label: "Preset shows stale data on first render", value: "2.0%" },
+      { label: "Rider prefers previous preset mid-session", value: "12.0%" },
+    ],
+    confidence: 91,
+    nextActions: [
+      {
+        label: "Switch to Corner-Exit overlay",
+        description: "Activate Corner-Exit preset for next session. Confirm all widgets live.",
+        cta: "Switch",
+      },
+      {
+        label: "Keep Braking Zone as fallback",
+        description: "Retain Braking Zone preset for one-click revert if rider requests.",
+        cta: "Preserve",
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 21. Black Box
+// ---------------------------------------------------------------------------
+
+export function blackBoxData(): ModuleDemoData {
+  return {
+    moduleId: "black-box",
+    status: "operational",
+    summary:
+      "Immutable incident recorder capturing 200+ telemetry channels at 1 kHz around crash and near-miss events — tamper-proof data for engineering root-cause analysis.",
+    metrics: [
+      {
+        label: "Recorded Incidents",
+        value: `${rng(1, 4, 0)}`,
+        sub: "this race weekend",
+        accent: "critical",
+        trend: "stable",
+      },
+      {
+        label: "Telemetry Channels",
+        value: "224",
+        sub: "at 1 kHz each",
+        accent: "neutral",
+        trend: "stable",
+      },
+      {
+        label: "Data Integrity",
+        value: "100 %",
+        sub: "SHA-256 verified",
+        accent: "positive",
+        trend: "stable",
+      },
+      {
+        label: "Last Dump Size",
+        value: `${rng(180, 450, 0)} MB`,
+        sub: "compressed telemetry",
+        accent: "neutral",
+        trend: "up",
+      },
+    ],
+    decision: {
+      title: "Flag telemetry anomaly at T-0 of incident #3 for engineering?",
+      recommendation:
+        "At T-0 (moment before impact) of incident #3, front-IMU shows 14.2 G vertical spike — 3× normal braking load. Possible sensor ringing or chassis-bottoming event. Recommend engineering root-cause analysis.",
+      impact: "Engineering team alerted | full 1 kHz telemetry dump attached (312 MB)",
+      confidence: 95,
+      urgency: "critical",
+      actionLabel: "Flag Anomaly",
+    },
+    evidence: [
+      {
+        label: "Front-IMU Vertical (T0)",
+        value: "14.2 G",
+        source: "IMU channel #04",
+        type: "sensor",
+      },
+      {
+        label: "Front-IMU Vertical (T–1 s)",
+        value: "4.8 G (normal braking)",
+        source: "IMU channel #04",
+        type: "sensor",
+      },
+      {
+        label: "Chassis Bottoming Indicator",
+        value: "Suspension poti — full compression",
+        source: "Suspension telemetry",
+        type: "sensor",
+      },
+      {
+        label: "Incident Type",
+        value: "High-side (T5 exit)",
+        source: "Incident classification model",
+        type: "model",
+      },
+    ],
+    risks: [
+      { label: "Sensor ringing — false anomaly flag", value: "8.0%" },
+      { label: "Data corruption in dump file", value: "0.5%" },
+    ],
+    confidence: 95,
+    nextActions: [
+      {
+        label: "Flag for engineering RCA",
+        description: "Send telemetry dump to engineering with anomaly marker at T-0.",
+        cta: "Flag",
+      },
+      {
+        label: "Cross-reference with video",
+        description: "Sync onboard camera footage with telemetry timeline for T5 exit.",
+        cta: "Sync Video",
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 22. Riding Style
+// ---------------------------------------------------------------------------
+
+export function ridingStyleData(): ModuleDemoData {
+  return {
+    moduleId: "riding-style",
+    status: "operational",
+    summary:
+      "Rider profile engine analysing braking points, throttle-roll precision, cornering lean angle, and overall style score — benchmarked against historical sessions and team-mate data.",
+    metrics: [
+      {
+        label: "Braking Points",
+        value: `${rng(30, 60, 0)} m`,
+        sub: "avg late-brake margin",
+        accent: "positive",
+        trend: "up",
+      },
+      {
+        label: "Throttle Opening",
+        value: `${rng(72, 88, 1)} %`,
+        sub: "corner-exit avg",
+        accent: "neutral",
+        trend: "up",
+      },
+      {
+        label: "Lean Angle",
+        value: `${rng(58, 65, 1)} °`,
+        sub: "max this session",
+        accent: "warning",
+        trend: "stable",
+      },
+      {
+        label: "Style Score",
+        value: `${rng(82, 94, 0)} / 100`,
+        sub: "overall rating",
+        accent: "positive",
+        trend: "up",
+      },
+    ],
+    decision: {
+      title: "Recommend later braking for sector 3?",
+      recommendation:
+        "Sector 3 analysis shows rider braking 12 m earlier than optimal at T9, losing 0.06 s per lap. Recommend braking point adjustment: brake marker board at 150 m → 120 m. Style adaptation score: 8.2/10 feasibility.",
+      impact: "–0.06 s/lap sector 3 | low risk (trail-brake margin adequate)",
+      confidence: 82,
+      urgency: "medium",
+      actionLabel: "Recommend Late Brake",
+    },
+    evidence: [
+      {
+        label: "T9 Braking Point",
+        value: "150 m board",
+        source: "GPS braking analysis",
+        type: "sensor",
+      },
+      {
+        label: "Optimal Braking Point",
+        value: "120 m board",
+        source: "Lap-optimisation model",
+        type: "model",
+      },
+      {
+        label: "S3 Time Loss",
+        value: "–0.06 s/lap",
+        source: "Sector delta analysis",
+        type: "model",
+      },
+      {
+        label: "Trail-Brake Margin",
+        value: "0.18 G (safe)",
+        source: "Braking-performance index",
+        type: "model",
+      },
+    ],
+    risks: [
+      { label: "Rider misses brake marker under pressure", value: "10.0%" },
+      { label: "Over-braking leads to front tuck", value: "5.0%" },
+    ],
+    confidence: 82,
+    nextActions: [
+      {
+        label: "Brief rider: later T9 braking",
+        description: "Advise moving brake marker from 150 m to 120 m at T9. Trail-brake OK.",
+        cta: "Brief",
+      },
+      {
+        label: "Monitor S3 delta",
+        description: "Watch sector 3 time after briefing. Expect immediate improvement.",
+        cta: "Monitor",
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 23. Gearing
+// ---------------------------------------------------------------------------
+
+export function gearingData(): ModuleDemoData {
+  return {
+    moduleId: "gearing",
+    status: "operational",
+    summary:
+      "Transmission-ratio and final-drive analysis per circuit — optimising gear spacing, speed-trap deltas, and corner-exit RPM to maximise drive out of every turn.",
+    metrics: [
+      {
+        label: "Current Ratio",
+        value: "16 / 42",
+        sub: "final drive sprockets",
+        accent: "neutral",
+        trend: "stable",
+      },
+      {
+        label: "Speed Trap Delta",
+        value: `${rng(0.4, 2.2, 1)} km/h`,
+        sub: "vs. optimal gearing",
+        accent: "warning",
+        trend: "down",
+      },
+      {
+        label: "RPM at Corner Exit",
+        value: `${rng(5200, 7100, 0)}`,
+        sub: "avg across all corners",
+        accent: "neutral",
+        trend: "stable",
+      },
+      {
+        label: "Recommended Change",
+        value: `–${rng(1, 3, 0)} T rear`,
+        sub: "for this circuit",
+        accent: "positive",
+        trend: "up",
+      },
+    ],
+    decision: {
+      title: "Change final drive to 16/41 for main straight top speed?",
+      recommendation:
+        "Speed trap shows –1.8 km/h deficit vs. optimal. Dropping rear sprocket from 42 to 41 teeth increases top speed by ~2.1 km/h at cost of +180 RPM corner-exit. Simulation shows net +0.04 s/lap gain.",
+      impact: "+2.1 km/h top speed | +180 RPM exit | net +0.04 s/lap gain",
+      confidence: 87,
+      urgency: "medium",
+      actionLabel: "Change to 16/41",
+    },
+    evidence: [
+      {
+        label: "Speed Trap Current",
+        value: "334.2 km/h",
+        source: "GPS speed trap",
+        type: "sensor",
+      },
+      {
+        label: "Speed Trap Optimal",
+        value: "336.0 km/h",
+        source: "Gearing optimisation model",
+        type: "model",
+      },
+      {
+        label: "Corner-Exit RPM Impact",
+        value: "+180 RPM (acceptable)",
+        source: "Transmission simulation",
+        type: "model",
+      },
+      {
+        label: "Lap-Gain Projection",
+        value: "+0.04 s/lap net",
+        source: "Full-lap simulation",
+        type: "model",
+      },
+    ],
+    risks: [
+      { label: "Corner-exit bog in slow turns (T6, T13)", value: "6.0%" },
+      { label: "Rider dislikes taller gearing feel", value: "10.0%" },
+    ],
+    confidence: 87,
+    nextActions: [
+      {
+        label: "Swap to 16/41 final drive",
+        description: "Replace rear sprocket 42T → 41T. Re-check chain tension and alignment.",
+        cta: "Swap",
+      },
+      {
+        label: "Validate with 5 flyers",
+        description: "Rider to complete 5 push laps. Compare speed trap and exit RPM.",
+        cta: "Validate",
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 24. Setup Lab
+// ---------------------------------------------------------------------------
+
+export function setupLabData(): ModuleDemoData {
+  return {
+    moduleId: "setup-lab",
+    status: "operational",
+    summary:
+      "Virtual experimentation matrix exploring setup deltas across suspension, geometry, and electronics — with Monte-Carlo validation and confidence scoring before track deployment.",
+    metrics: [
+      {
+        label: "Experiments Run",
+        value: `${rng(120, 340, 0)}`,
+        sub: "this track visit",
+        accent: "neutral",
+        trend: "up",
+      },
+      {
+        label: "Active Setups",
+        value: `${rng(3, 7, 0)}`,
+        sub: "under evaluation",
+        accent: "neutral",
+        trend: "stable",
+      },
+      {
+        label: "Delta to Baseline",
+        value: `–${rng(0.05, 0.35, 3)} s`,
+        sub: "best candidate",
+        accent: "positive",
+        trend: "up",
+      },
+      {
+        label: "Confidence Interval",
+        value: `${rng(82, 96, 0)} %`,
+        sub: "best-candidate validation",
+        accent: "positive",
+        trend: "up",
+      },
+    ],
+    decision: {
+      title: "Promote setup candidate #SB-247 to track validation?",
+      recommendation:
+        "Candidate #SB-247 (softer rear spring + 2 clicks rebound) shows –0.28 s/lap delta with 91 % confidence in simulation. Recommend promote to track validation — 3 back-to-back comparison laps against baseline.",
+      impact: "–0.28 s/lap projected | 3 validation laps required | revert possible in 2 min",
+      confidence: 91,
+      urgency: "medium",
+      actionLabel: "Promote to Validation",
+    },
+    evidence: [
+      {
+        label: "Candidate ID",
+        value: "SB-247",
+        source: "Setup experiment matrix",
+        type: "model",
+      },
+      {
+        label: "Delta to Baseline",
+        value: "–0.28 s/lap",
+        source: "Lap-simulation v4.1",
+        type: "model",
+      },
+      {
+        label: "Monte-Carlo Confidence",
+        value: "91 % (10k runs)",
+        source: "Setup validation pipeline",
+        type: "model",
+      },
+      {
+        label: "Baseline Setup Fingerprint",
+        value: "Hard rear / 28 clicks rebound",
+        source: "Current bike config",
+        type: "sensor",
+      },
+    ],
+    risks: [
+      { label: "Sim-to-track correlation drift", value: "9.0%" },
+      { label: "Rider cannot adapt within 3 laps", value: "7.0%" },
+    ],
+    confidence: 91,
+    nextActions: [
+      {
+        label: "Promote SB-247 to track",
+        description: "Deploy candidate setup. Rider to run 3 back-to-back validation laps.",
+        cta: "Promote",
+      },
+      {
+        label: "Keep baseline ready",
+        description: "Ensure baseline setup can be restored within 2 min if candidate fails.",
+        cta: "Prepare Revert",
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 25. Bike Comparison
+// ---------------------------------------------------------------------------
+
+export function bikeComparisonData(): ModuleDemoData {
+  return {
+    moduleId: "bike-comparison",
+    status: "operational",
+    summary:
+      "Side-by-side configuration comparison between Bike A (your rider) and Bike B (teammate / evolution) — highlighting setup deltas, performance gaps, and migration candidates.",
+    metrics: [
+      {
+        label: "Top Speed Delta",
+        value: `+${rng(0.3, 2.4, 1)} km/h`,
+        sub: "Bike B faster",
+        accent: "warning",
+        trend: "up",
+      },
+      {
+        label: "Corner Exit Delta",
+        value: `–${rng(0.02, 0.12, 3)} s`,
+        sub: "Bike B faster",
+        accent: "critical",
+        trend: "down",
+      },
+      {
+        label: "Braking Stability",
+        value: `Bike A ${rng(0.2, 0.8, 1)} G better`,
+        sub: "Bike A advantage",
+        accent: "positive",
+        trend: "stable",
+      },
+      {
+        label: "Config Diff Score",
+        value: `${rng(8, 24, 0)} %`,
+        sub: "dissimilarity index",
+        accent: "neutral",
+        trend: "stable",
+      },
+    ],
+    decision: {
+      title: "Adopt Bike B's corner-exit suspension settings?",
+      recommendation:
+        "Bike B is gaining 0.07 s on corner exit through softer rear spring (–4 N/mm) and +2 clicks rebound. Simulation shows 80 % of that gain transfers to Bike A with minimal braking trade-off. Recommend adopt.",
+      impact: "–0.056 s/lap corner-exit gain projected | braking stability loss within 0.1 G",
+      confidence: 80,
+      urgency: "medium",
+      actionLabel: "Adopt Bike B Settings",
+    },
+    evidence: [
+      {
+        label: "Bike B Rear Spring",
+        value: "72 N/mm (softer)",
+        source: "Setup comparison tool",
+        type: "sensor",
+      },
+      {
+        label: "Bike A Rear Spring",
+        value: "76 N/mm (current)",
+        source: "Setup comparison tool",
+        type: "sensor",
+      },
+      {
+        label: "Corner-Exit Grip Delta",
+        value: "–0.07 s from B",
+        source: "Sector delta analysis",
+        type: "model",
+      },
+      {
+        label: "Transferability Score",
+        value: "80 % confidence",
+        source: "Cross-bike simulation",
+        type: "model",
+      },
+    ],
+    risks: [
+      { label: "Braking stability degrades beyond tolerance", value: "11.0%" },
+      { label: "Bike B setup does not translate to A", value: "15.0%" },
+    ],
+    confidence: 80,
+    nextActions: [
+      {
+        label: "Adopt Bike B suspension",
+        description: "Change rear spring to 72 N/mm and +2 clicks rebound. Validate 5 laps.",
+        cta: "Adopt",
+      },
+      {
+        label: "Monitor braking stability",
+        description: "Watch braking G-force and rider feedback on front-end feel after change.",
+        cta: "Monitor",
+      },
+    ],
+  };
+}
+

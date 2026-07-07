@@ -79,7 +79,7 @@ export interface RaceModule {
  */
 export const RACE_MODULES: RaceModule[] = [
   // ?????????????????????????????????????????????????????????
-  // COMMAND — Core race-day operations
+  // COMMAND ï¿½ Core race-day operations
   // ?????????????????????????????????????????????????????????
   {
     id: "overview",
@@ -220,7 +220,7 @@ export const RACE_MODULES: RaceModule[] = [
   },
 
   // ?????????????????????????????????????????????????????????
-  // PLATFORM INTELLIGENCE — Data & observability
+  // PLATFORM INTELLIGENCE ï¿½ Data & observability
   // ?????????????????????????????????????????????????????????
   {
     id: "edge-hub",
@@ -251,9 +251,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Code,
     badge: "AI",
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "API documentation and SDK tools",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "data-trust",
@@ -271,9 +271,9 @@ export const RACE_MODULES: RaceModule[] = [
     route: "/connect-data",
     icon: Globe,
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "External data source integration",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "race-control",
@@ -292,9 +292,9 @@ export const RACE_MODULES: RaceModule[] = [
     route: "/pit-radio",
     icon: Headphones,
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "Team communication and audio logs",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "team-workspace",
@@ -302,9 +302,9 @@ export const RACE_MODULES: RaceModule[] = [
     route: "/team-workspace",
     icon: Users2,
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "Collaborative team environment",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "visualization-os",
@@ -313,9 +313,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Eye,
     badge: "AI",
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "Data visualization and dashboard builder",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "human-performance",
@@ -345,13 +345,13 @@ export const RACE_MODULES: RaceModule[] = [
     route: "/black-box",
     icon: AlertTriangle,
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "Incident recorder and telemetry dump",
-    implemented: false,
+    implemented: true,
   },
 
   // ?????????????????????????????????????????????????????????
-  // ENGINEERING — Bike & part technical modules
+  // ENGINEERING ï¿½ Bike & part technical modules
   // ?????????????????????????????????????????????????????????
   {
     id: "riding-style",
@@ -359,9 +359,9 @@ export const RACE_MODULES: RaceModule[] = [
     route: "/riding-style",
     icon: Bike,
     section: "Engineering",
-    status: "coming-soon",
+    status: "preview",
     description: "Rider style analysis and adaptation",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "engineering-control",
@@ -425,9 +425,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Gauge,
     badge: "AI",
     section: "Engineering",
-    status: "coming-soon",
+    status: "preview",
     description: "Transmission ratios and final drive",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "setup-lab",
@@ -437,7 +437,7 @@ export const RACE_MODULES: RaceModule[] = [
     section: "Engineering",
     status: "preview",
     description: "Virtual setup experimentation",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "brake-thermal",
@@ -456,9 +456,9 @@ export const RACE_MODULES: RaceModule[] = [
     route: "/bike-comparison",
     icon: GitCompare,
     section: "Engineering",
-    status: "coming-soon",
+    status: "preview",
     description: "Side-by-side bike configuration comparison",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "parts",
@@ -482,7 +482,7 @@ export const RACE_MODULES: RaceModule[] = [
   },
 
   // ?????????????????????????????????????????????????????????
-  // TRACK & COMPETITION — Circuit and race-weekend modules
+  // TRACK & COMPETITION ï¿½ Circuit and race-weekend modules
   // ?????????????????????????????????????????????????????????
   {
     id: "track-evolution",
