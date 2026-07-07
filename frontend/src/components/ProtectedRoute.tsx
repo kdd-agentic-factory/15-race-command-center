@@ -10,6 +10,8 @@ import { setAuthToken } from "../api/client";
  * redirecting — this prevents redirect loops (settings → settings)
  * and avoids black screens.
  */
+const IS_PREVIEW_MODE = import.meta.env.VITE_RCC_PREVIEW_MODE === "true";
+
 export function ProtectedRoute() {
   const token = getAuthToken();
   const location = useLocation();
@@ -21,6 +23,11 @@ export function ProtectedRoute() {
     setAuthToken(inputToken);
     setShowLogin(false);
   };
+
+  /* ── Preview mode: skip auth block, render children ── */
+  if (IS_PREVIEW_MODE) {
+    return <Outlet />;
+  }
 
   if (showLogin) {
     return (

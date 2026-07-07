@@ -1,5 +1,8 @@
 FROM node:20.18.0-slim AS frontend-build
 
+ARG VITE_RCC_PREVIEW_MODE
+ENV VITE_RCC_PREVIEW_MODE=${VITE_RCC_PREVIEW_MODE}
+
 WORKDIR /app/frontend
 
 COPY frontend/package*.json ./

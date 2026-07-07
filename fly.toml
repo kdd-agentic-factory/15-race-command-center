@@ -8,6 +8,9 @@ primary_region = "fra"
 [build]
   dockerfile = "Dockerfile"
 
+[build.args]
+  VITE_RCC_PREVIEW_MODE = "true"
+
 [http_service]
   internal_port = 8150
   force_https = true
