@@ -1,4 +1,4 @@
-﻿import type { ComponentType } from "react";
+import type { ComponentType } from "react";
 import type { LucideProps } from "lucide-react";
 import {
   Activity,
@@ -78,9 +78,9 @@ export interface RaceModule {
  * badge, status, and whether a real page implementation exists.
  */
 export const RACE_MODULES: RaceModule[] = [
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // COMMAND — Core race-day operations
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ?????????????????????????????????????????????????????????
+  // COMMAND � Core race-day operations
+  // ?????????????????????????????????????????????????????????
   {
     id: "overview",
     label: "Overview",
@@ -204,9 +204,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Brain,
     badge: "AI",
     section: "Command",
-    status: "coming-soon",
+    status: "preview",
     description: "Autonomous engineering agent",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "settings",
@@ -219,9 +219,9 @@ export const RACE_MODULES: RaceModule[] = [
     implemented: true,
   },
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // PLATFORM INTELLIGENCE — Data & observability
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ?????????????????????????????????????????????????????????
+  // PLATFORM INTELLIGENCE � Data & observability
+  // ?????????????????????????????????????????????????????????
   {
     id: "edge-hub",
     label: "Trackside Edge Hub",
@@ -229,9 +229,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Radio,
     badge: "AI",
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "Edge computing and data ingestion",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "data-lakehouse",
@@ -240,9 +240,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Database,
     badge: "AI",
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "Central data storage and query",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "developer-hub",
@@ -263,7 +263,7 @@ export const RACE_MODULES: RaceModule[] = [
     section: "Platform Intelligence",
     status: "coming-soon",
     description: "Data governance and lineage",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "connect-data",
@@ -282,9 +282,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Siren,
     badge: "AI",
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "Race direction and flag management",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "pit-radio",
@@ -324,9 +324,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Heart,
     badge: "AI",
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "Rider biometrics and fitness",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "oracle-pit-wall",
@@ -335,9 +335,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: BarChart3,
     badge: "AI",
     section: "Platform Intelligence",
-    status: "coming-soon",
+    status: "preview",
     description: "Predictive insights and forecasting",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "black-box",
@@ -350,9 +350,9 @@ export const RACE_MODULES: RaceModule[] = [
     implemented: false,
   },
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // ENGINEERING — Bike & part technical modules
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ?????????????????????????????????????????????????????????
+  // ENGINEERING � Bike & part technical modules
+  // ?????????????????????????????????????????????????????????
   {
     id: "riding-style",
     label: "Riding Style",
@@ -370,9 +370,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Joystick,
     badge: "AI",
     section: "Engineering",
-    status: "coming-soon",
+    status: "preview",
     description: "Real-time engineering parameter control",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "electronics",
@@ -381,9 +381,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Zap,
     badge: "AI",
     section: "Engineering",
-    status: "coming-soon",
+    status: "preview",
     description: "ECU, wiring and electronic systems",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "aerodynamics",
@@ -392,9 +392,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Fan,
     badge: "AI",
     section: "Engineering",
-    status: "coming-soon",
+    status: "preview",
     description: "Aero mapping and drag analysis",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "fuel-energy",
@@ -403,9 +403,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Fuel,
     badge: "AI",
     section: "Engineering",
-    status: "coming-soon",
+    status: "preview",
     description: "Fuel consumption and energy management",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "chassis-geometry",
@@ -414,9 +414,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Cog,
     badge: "AI",
     section: "Engineering",
-    status: "coming-soon",
+    status: "preview",
     description: "Chassis setup and geometric configuration",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "gearing",
@@ -446,9 +446,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Thermometer,
     badge: "AI",
     section: "Engineering",
-    status: "coming-soon",
+    status: "preview",
     description: "Brake temperature and wear analysis",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "bike-comparison",
@@ -481,9 +481,9 @@ export const RACE_MODULES: RaceModule[] = [
     implemented: true,
   },
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // TRACK & COMPETITION — Circuit and race-weekend modules
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ?????????????????????????????????????????????????????????
+  // TRACK & COMPETITION � Circuit and race-weekend modules
+  // ?????????????????????????????????????????????????????????
   {
     id: "track-evolution",
     label: "Track Evolution",
@@ -556,9 +556,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Target,
     badge: "AI",
     section: "Track & Competition",
-    status: "coming-soon",
+    status: "preview",
     description: "Qualifying simulation and strategy",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "rival-radar",
@@ -567,9 +567,9 @@ export const RACE_MODULES: RaceModule[] = [
     icon: Radar,
     badge: "AI",
     section: "Track & Competition",
-    status: "coming-soon",
+    status: "preview",
     description: "Competitor analysis and benchmarking",
-    implemented: false,
+    implemented: true,
   },
   {
     id: "strategy",
@@ -642,3 +642,17 @@ export function modulesBySection(): Record<ModuleSection, RaceModule[]> {
   }
   return groups;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

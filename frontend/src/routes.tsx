@@ -22,6 +22,23 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { CockpitPage } from "./pages/CockpitPage";
 import { SessionLaunchPage } from "./pages/SessionLaunchPage";
 
+// ─── Phase 18.4 — upgraded module pages ───
+import { AutonomousEngineerPage } from "./pages/AutonomousEngineerPage";
+import { OraclePitWallPage } from "./pages/OraclePitWallPage";
+import { RaceControlPage } from "./pages/RaceControlPage";
+import { TracksideEdgeHubPage } from "./pages/TracksideEdgeHubPage";
+import { DataLakehousePage } from "./pages/DataLakehousePage";
+import { DataTrustPage } from "./pages/DataTrustPage";
+import { HumanPerformancePage } from "./pages/HumanPerformancePage";
+import { EngineeringControlPage } from "./pages/EngineeringControlPage";
+import { ElectronicsPage } from "./pages/ElectronicsPage";
+import { AerodynamicsPage } from "./pages/AerodynamicsPage";
+import { FuelEnergyPage } from "./pages/FuelEnergyPage";
+import { ChassisGeometryPage } from "./pages/ChassisGeometryPage";
+import { BrakeThermalPage } from "./pages/BrakeThermalPage";
+import { RivalRadarPage } from "./pages/RivalRadarPage";
+import { QualifyingLabPage } from "./pages/QualifyingLabPage";
+
 // ─── Route map: module-id → component ───
 // Implemented modules get their real page; everything else falls through to ModulePlaceholderPage.
 const PAGE_BY_ID: Record<string, React.ComponentType> = {
@@ -36,29 +53,29 @@ const PAGE_BY_ID: Record<string, React.ComponentType> = {
   "session-report": ReportsPage,
   copilot:         AICopilotPage,
   platform:        ModulePlaceholderPage,
-  "autonomous-engineer": ModulePlaceholderPage,
+  "autonomous-engineer": AutonomousEngineerPage,
   settings:        SettingsPage,
-  "edge-hub":      ModulePlaceholderPage,
-  "data-lakehouse": ModulePlaceholderPage,
+  "edge-hub":      TracksideEdgeHubPage,
+  "data-lakehouse": DataLakehousePage,
   "developer-hub": ModulePlaceholderPage,
-  "data-trust":    ModulePlaceholderPage,
+  "data-trust":    DataTrustPage,
   "connect-data":  ModulePlaceholderPage,
-  "race-control":  ModulePlaceholderPage,
+  "race-control":  RaceControlPage,
   "pit-radio":     ModulePlaceholderPage,
   "team-workspace": ModulePlaceholderPage,
   "visualization-os": ModulePlaceholderPage,
-  "human-performance": ModulePlaceholderPage,
-  "oracle-pit-wall": ModulePlaceholderPage,
+  "human-performance": HumanPerformancePage,
+  "oracle-pit-wall": OraclePitWallPage,
   "black-box":     ModulePlaceholderPage,
   "riding-style":  ModulePlaceholderPage,
-  "engineering-control": ModulePlaceholderPage,
-  electronics:     ModulePlaceholderPage,
-  aerodynamics:    ModulePlaceholderPage,
-  "fuel-energy":   ModulePlaceholderPage,
-  "chassis-geometry": ModulePlaceholderPage,
+  "engineering-control": EngineeringControlPage,
+  electronics:     ElectronicsPage,
+  aerodynamics:    AerodynamicsPage,
+  "fuel-energy":   FuelEnergyPage,
+  "chassis-geometry": ChassisGeometryPage,
   gearing:         ModulePlaceholderPage,
   "setup-lab":     ModulePlaceholderPage,
-  "brake-thermal": ModulePlaceholderPage,
+  "brake-thermal": BrakeThermalPage,
   "bike-comparison": ModulePlaceholderPage,
   parts:           PartsDesignPage,
   tires:           TireDegradationPage,
