@@ -16,7 +16,7 @@ export function ModulePlaceholderPage() {
 
   if (!mod) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center py-20 text-center bg-kdd-bg">
         <Construction className="mb-4 h-12 w-12 text-kdd-dim" />
         <h2 className="text-xl font-semibold">Module Not Found</h2>
         <p className="mt-2 text-sm text-kdd-dim">No registry entry for {location.pathname}</p>
@@ -31,7 +31,7 @@ export function ModulePlaceholderPage() {
   const Icon = mod.icon;
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-[60vh] space-y-8 bg-kdd-bg">
       {/* Header */}
       <header className="flex items-start justify-between">
         <div>
@@ -103,3 +103,4 @@ export function ModulePlaceholderPage() {
     </div>
   );
 }
+

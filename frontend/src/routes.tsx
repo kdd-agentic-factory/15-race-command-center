@@ -2,9 +2,10 @@
 import { AppShell } from "./components/layout/AppShell";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ModulePlaceholderPage } from "./components/ModulePlaceholderPage";
+import { RouteErrorFallback } from "./components/RouteErrorFallback";
 import { RACE_MODULES } from "./config/raceCommandModules";
 
-// ── Real page imports ──
+// ─── Real page imports ───
 import { PlatformOverviewPage } from "./pages/PlatformOverviewPage";
 import { LiveTelemetryPage } from "./pages/LiveTelemetryPage";
 import { CircuitIntelligencePage } from "./pages/CircuitIntelligencePage";
@@ -21,7 +22,7 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { CockpitPage } from "./pages/CockpitPage";
 import { SessionLaunchPage } from "./pages/SessionLaunchPage";
 
-// ── Route map: module-id → component ──
+// ─── Route map: module-id → component ───
 // Implemented modules get their real page; everything else falls through to ModulePlaceholderPage.
 const PAGE_BY_ID: Record<string, React.ComponentType> = {
   overview:        PlatformOverviewPage,
@@ -78,11 +79,10 @@ const PAGE_BY_ID: Record<string, React.ComponentType> = {
 
 /**
  * Routes exposed as public preview by 13-ui-command-center serviceRegistry.
- * These render WITHOUT auth.
+ * These render WITHOUT auth — matched against RACE_MODULES[].id.
  */
 const PUBLIC_ROUTES = new Set([
-  "launch",
-  "pitwall",
+  "cockpit",      // /pitwall
   "telemetry",
   "circuit",
   "tires",
@@ -94,8 +94,24 @@ const PUBLIC_ROUTES = new Set([
   "copilot",
   "ai-copilot",
   "digital-twin",
-  "reports",
+  "session-report",   // /reports
+  "session-launch",   // /launch
+  "overview",
 ]);
+
+/**
+ * Wraps a route component with:
+ * 1. RouteErrorFallback for render-crash safety
+ * 2. ModulePlaceholderPage fallback for unimplemented modules
+ */
+function routeElement(moduleId: string, Component: React.ComponentType): React.ReactElement {
+  const FallbackComponent = Component;
+  return (
+    <RouteErrorFallback moduleName={moduleId}>
+      <FallbackComponent />
+    </RouteErrorFallback>
+  );
+}
 
 export const router = createBrowserRouter(
   [
@@ -103,30 +119,42 @@ export const router = createBrowserRouter(
       path: "/",
       element: <AppShell />,
       children: [
-        // ── Public preview routes (no auth) ──
+        // ─── Public preview routes (no auth) ───
         ...RACE_MODULES
           .filter((m) => PUBLIC_ROUTES.has(m.id))
           .map((m) => {
             const Component = PAGE_BY_ID[m.id] ?? ModulePlaceholderPage;
-            return { path: m.route.replace("/", ""), element: <Component /> };
+            return { path: m.route.replace("/", ""), element: routeElement(m.id, Component) };
           }),
 
-        // ── Protected routes (auth required) ──
+        // ─── Protected routes (auth required) ───
         {
           element: <ProtectedRoute />,
           children: [
-            { index: true, element: <PlatformOverviewPage /> },
+            { index: true, element: routeElement("overview", PlatformOverviewPage) },
             ...RACE_MODULES
               .filter((m) => !PUBLIC_ROUTES.has(m.id))
               .map((m) => {
                 const Component = PAGE_BY_ID[m.id] ?? ModulePlaceholderPage;
-                return { path: m.route.replace("/", ""), element: <Component /> };
+                return { path: m.route.replace("/", ""), element: routeElement(m.id, Component) };
               }),
           ],
         },
 
-        // 404 catch-all
-        { path: "*", element: <div className="p-8 text-center font-kdd-mono text-kdd-dim">Page not found</div> },
+        // 404 catch-all — always visible
+        { path: "*", element: (
+          <RouteErrorFallback moduleName="404">
+            <div className="flex min-h-[60vh] items-center justify-center p-6">
+              <div className="text-center">
+                <h2 className="text-xl font-semibold text-kdd-text">Page not found</h2>
+                <p className="mt-2 text-sm text-kdd-dim">No module registered for this route</p>
+                <a href="/overview" className="mt-4 inline-flex items-center gap-2 rounded-kdd-md bg-kdd-accent px-4 py-2 text-sm font-medium text-white hover:bg-kdd-accent-hover">
+                  Return to Overview
+                </a>
+              </div>
+            </div>
+          </RouteErrorFallback>
+        )},
       ],
     },
   ],
